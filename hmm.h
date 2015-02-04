@@ -45,12 +45,11 @@ private:
 
 public:
 
-	HMM() {}
-
+	HMM(int T, int N) : _T(T), _N(N) {}
 	virtual ~HMM(){}
 
 	// split data
-	void split();
+	void split(string &s, vector<string> &split_ret, const string &tag);
 
 	// calculate the confused matrix _B
 	// _B[i][j] indicating the probability of generating observed
