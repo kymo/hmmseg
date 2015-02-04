@@ -3,7 +3,7 @@
 // auth : aron @ whu
 // date : 2015-02-20
 
-#include "hmm.h"
+#include "wordseg.h"
 
 int test_train_module(int argv, char *argc[]) {
 	if (argv < 5) {
@@ -36,9 +36,7 @@ int test_decode_module(int argv, char *argc[]) {
 	hmm->load_model(argc[1]);
 	ifstream fis(argc[2]);
 	int n;
-	
 	fis >> n;
-	
 	for (int i = 0; i < n; i ++) {
 		int m;
 		fis >> m;
@@ -56,9 +54,38 @@ int test_decode_module(int argv, char *argc[]) {
 		}
 		cout << endl;
 	}
+
+}
+
+void test_word_seg(int argv, char *argc[]) {
+	
+	if (argv < 3) {
+		cout << "Usage ./wordseg [training file] [dict file path]" << endl;
+		return ;
+	}
+	WordSeg *word_seg = new WordSeg();
+	word_seg->load_data(argc[1]);
+	word_seg->save_dict(argc[2]);
+}
+
+void test_seg_word(int argv, char *argc[]) {
+	if (argv < 4) {
+		cout << "Usage ./wordseg [dict file] [model file] [test file]" << endl;
+		return ;
+	}
+	WordSeg *word_seg = new WordSeg();
+	word_seg->init_env(argc[1], argc[2]);
+	ifstream fis(argc[3]);
+	string line;
+	while (getline(fis, line)) {
+		vector<string> results;
+		word_seg->segment(line, results);
+	}
 }
 
 int main(int argv, char *argc[]) {
-	test_decode_module(argv, argc);
+	// test_train_module(argv, argc);
+	test_word_seg(argv, argc);
+	// test_seg_word(argv, argc);
 	return 0;
 }

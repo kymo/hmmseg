@@ -7,15 +7,23 @@
 
 
 void HMM::split(string &s, vector<string> &split_ret, const string &tag) {
+	split_ret.clear();
 	if (s.find(tag) == string::npos) {
+		if (s.length() != 0) {
+			split_ret.push_back(s);
+		}
 		return ;
 	}
-	split_ret.clear();
 	int cur_pos = 0, find_pos = 0;
 	s += tag;
 	while ((find_pos = s.find(tag, cur_pos)) != string::npos) {
-		split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
+		string subs = s.substr(cur_pos, find_pos - cur_pos);
+		if (subs.size() != 0) {
+			
+			split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
+		}
 		cur_pos = find_pos + 1;
+
 	}
 }
 
@@ -38,25 +46,29 @@ bool HMM::load_training_sample(const char* file_name) {
 	string line, tag;
 	int line_num = 0;
 	vector<string> split_ret;
+	int obs_seq_id, hid_sta_id; 
 	while (getline(fis, line)) {
 		int last_hid_status = -1;
-		tag = "\t";
+		tag = ",";
 		line_num += 1;
 		split(line, split_ret, tag);
+		if (split_ret.size() == 0) continue;
+
 		for (vector<string>::iterator it = split_ret.begin();
 				it !=  split_ret.end(); it ++) {
+			cout << *it << " ";
 			vector<string> cur_split_ret;
 			tag = ":";
+
 			split(*it, cur_split_ret, tag);
-		
+			if (cur_split_ret.size() == 0) continue;
+			
+
 			if (cur_split_ret.size() != 2) {
 				cerr << "Error when loading training sample : data format is not legal in line" <<
 					line_num << endl;
 				return false;
 			}
-			
-			int obs_seq_id, hid_sta_id; 
-			
 			if (! str_to_number(obs_seq_id, cur_split_ret[1]) ||
 					! str_to_number(hid_sta_id, cur_split_ret[0])) {
 				cerr << "Error when loading training sample : data type is not legal in line " <<
@@ -80,19 +92,13 @@ bool HMM::load_training_sample(const char* file_name) {
 			last_hid_status = hid_sta_id;
 		}
 	}
-	cout << "end" << endl;
-	cout << _T << " " << _N << endl;
-	for (int i = 1; i <= _N; i ++) {
-		cout << _sta_cnt[i] << " ";
-	}
-	cout << endl;
 	return true;
 }
 
 void HMM::calc_confused_matrix() {
 	for (int j = 1; j <= _N; j ++) {
 		for (int k = 1; k <= _T; k ++) {
-			_B[j][k] = 1.0 * _hid_obv_cnt[j][k] / _sta_cnt[j];
+			_B[j][k] = 1.0 * (1 + 1.0 * _hid_obv_cnt[j][k]) / _sta_cnt[j];
 		}
 	}
 }
@@ -100,7 +106,7 @@ void HMM::calc_confused_matrix() {
 void HMM::calc_tranfer_matrix() {
 	for (int j = 1; j <= _N; j ++) {
 		for (int k = 1; k <= _N; k ++) {
-			_A[j][k] = 1.0 * _sta_co_cnt[j][k] / _sta_cnt[j];
+			_A[j][k] = 1.0 * (1 + 1.0 * _sta_co_cnt[j][k]) / _sta_cnt[j];
 		}
 	}
 }
@@ -212,7 +218,6 @@ bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
 	vector<vector<int> > opt_path;
 	float max_value, max_index;
 	T = observed_seq.size();
-
 	for (int j = 0; j <= T; j ++) {
 		beta.push_back(vector<float>(_N + 1, 0));
 		opt_path.push_back(vector<int>(_N + 1, 0));
@@ -223,7 +228,7 @@ bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
 		opt_path[1][j] = j;
 	}
 
-	for (int t = 2; t <= _T; t ++) {
+	for (int t = 2; t <= T; t ++) {
 		for (int i = 1; i <= _N; i ++) {
 			max_value = 0.0;
 			for (int j = 1; j <= _N; j ++) {
