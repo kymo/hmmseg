@@ -12,6 +12,7 @@
 
 
 void HMM::calc_confused_matrix() {
+
 }
 
 void HMM::calc_tranfer_matrix() {
@@ -26,10 +27,11 @@ void HMM::load_model() {
 }
 
 
-void HMM::segment(const string *words, vector<string> &seg_result) {
+void HMM::statistic_train() {
 
 }
 
 
+void 
 
 #endif
