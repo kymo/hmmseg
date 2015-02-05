@@ -1,5 +1,4 @@
-// wordseg source file
-// 
+// wordseg source file 
 
 // auth : aron
 // date : 2015-02-02
@@ -176,13 +175,22 @@ void WordSeg::segment(string str, vector<string> &word_seg_result) {
 	clean_str(str);
 	int word_len = str.length() / 3;
 	vector<int> sequence;
+
 	for (int i = 0; i < word_len; i ++) {
 		string substr = str.substr(3 * i, 3);
 		sequence.push_back(word_to_index[substr]);
 		cout << word_to_index[substr] << endl;
 	}
+
 	vector<int> hidden_status;
 	hmm->viterbi(sequence, hidden_status);
+	
+	for (int j = 0; j < word_len; j ++) {
+		cout << hidden_status[j] << " ";
+	}
+	cout << endl;
+
+	cout << sequence.size() << " " << hidden_status.size() << endl;
 	for (int j = 0; j < word_len; j ++) {
 		string substr = str.substr(3 * j, 3);
 		cout << substr;
@@ -190,5 +198,6 @@ void WordSeg::segment(string str, vector<string> &word_seg_result) {
 			cout << "\\ ";
 		}
 	}
+	cout << endl;
 }
 

@@ -40,6 +40,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <cmath>
+
 using namespace std;
 
 class HMM {

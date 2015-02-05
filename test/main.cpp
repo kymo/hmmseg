@@ -44,6 +44,7 @@ int test_decode_module(int argv, char *argc[]) {
 		for (int j = 0; j < m; j ++) {
 			int cur;
 			fis >> cur;
+			cout << cur << "-" << endl;
 			sequence.push_back(cur);
 		}
 		vector<int> status;
@@ -79,6 +80,7 @@ void test_seg_word(int argv, char *argc[]) {
 	string line;
 	while (getline(fis, line)) {
 		vector<string> results;
+		cout << line << endl;
 		word_seg->segment(line, results);
 	}
 }
@@ -86,6 +88,8 @@ void test_seg_word(int argv, char *argc[]) {
 int main(int argv, char *argc[]) {
 	// test_train_module(argv, argc);
 	test_word_seg(argv, argc);
+     
 	// test_seg_word(argv, argc);
+	// test_decode_module(argv, argc);
 	return 0;
 }

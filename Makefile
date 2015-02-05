@@ -1,5 +1,5 @@
 cc=g++
-target=hmm
+target=wordseg
 obj=obj/main.o obj/wordseg.o obj/hmm.o
 CFLAGS= -O2 -I ./include
 
@@ -18,4 +18,3 @@ obj/wordseg.o : src/wordseg.cpp
 
 clean :
 	rm $(target) obj/*.o
-
