@@ -1,5 +1,3 @@
-#ifndef _HMM_H_
-#define _HHH_H_
 // hidden markov model for segmentation
 // firstly we use the training file to train a model
 // then we save the model into file, and then supply 
@@ -120,4 +118,3 @@ public:
 	bool viterbi(const vector<int> &observed_seq, vector<int> & hidden_status);	
 };
 
-#endif

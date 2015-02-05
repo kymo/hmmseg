@@ -1,17 +1,21 @@
 cc=g++
 target=hmm
-obj=main.o wordseg.o hmm.o
+obj=obj/main.o obj/wordseg.o obj/hmm.o
+CFLAGS= -O2 -I ./include
+
+
 $(target) : $(obj)
 	$(cc) -o $(target) $(obj)
 
-main.o : main.cpp
-	$(cc) -c main.cpp
+obj/main.o : test/main.cpp 
+	$(cc) -c test/main.cpp $(CFLAGS) -o obj/main.o
 
-hmm.o : hmm.cpp
-	$(cc) -c hmm.cpp
+obj/hmm.o : src/hmm.cpp
+	$(cc) -c src/hmm.cpp $(CFLAGS) -o obj/hmm.o
 
-wordseg.o : wordseg.cpp
-	$(cc) -c wordseg.cpp
+obj/wordseg.o : src/wordseg.cpp
+	$(cc) -c src/wordseg.cpp $(CFLAGS) -o obj/wordseg.o
 
 clean :
-	rm *.o hmm
+	rm $(target) obj/*.o
+
