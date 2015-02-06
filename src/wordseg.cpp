@@ -28,7 +28,6 @@ void WordSeg::get_word_index(int &cur_word_cnt,
 	int word_len = str.size() / 3;
 	for (int i = 0; i < word_len; i ++) {
 		string sub = str.substr(i * 3, 3);
-		cout << sub << "~" << endl;
 		if (word_to_index.find(sub) == word_to_index.end()) {
 			cur_word_cnt += 1;
 			word_to_index[sub] = cur_word_cnt;
@@ -61,33 +60,48 @@ void WordSeg::load_data(const char *file_name) {
 		tag = "  ";
 		split(line, split_ret, tag);
 		string all_ans = "";
+		vector<int> test;
 		for (int i = 0; i < split_ret.size(); i ++) {
 			string ret_ans = "";
 			vector<int> str_indexes;
 			get_word_index(cur_diff_word_cnt, str_indexes, split_ret[i]);
 			for (int j = 0; j < str_indexes.size(); j ++) {
 				if (j == 0) {
+					test.push_back(1);
 					ret_ans += "1:" + int_to_str(str_indexes[j]);
 				} else if (j < str_indexes.size() - 1) {
+					test.push_back(2);
 					ret_ans += "2:" + int_to_str(str_indexes[j]);
 				} else {
+					test.push_back(3);
 					ret_ans += "3:" + int_to_str(str_indexes[j]);
 				}
 				if (j < str_indexes.size() - 1) {
 					ret_ans += ",";
 				}
 			}
-			
+
 			if (str_indexes.size() == 1) {
+				test.push_back(4);
 				ret_ans[0] = '4';
 			}
+
 			all_ans += ret_ans;
-			if (i < split_ret.size() - 1) {
-				
+			int len = split_ret.size() - 1;
+			if (i < len) {
 				all_ans += ",";
 			}
 		}
-		//cout << all_ans << endl;
+
+		int len = test.size();
+		for (int i = 0; i < len - 1; i ++) {
+			if (test[i] == 1 && test[i + 1] == 1) {
+				//cout << line << endl;
+				break;
+			}
+		}
+	
+		cout << all_ans << endl;
 	}
 }
 
@@ -179,25 +193,22 @@ void WordSeg::segment(string str, vector<string> &word_seg_result) {
 	for (int i = 0; i < word_len; i ++) {
 		string substr = str.substr(3 * i, 3);
 		sequence.push_back(word_to_index[substr]);
-		cout << word_to_index[substr] << endl;
 	}
 
 	vector<int> hidden_status;
-	hmm->viterbi(sequence, hidden_status);
-	
-	for (int j = 0; j < word_len; j ++) {
-		cout << hidden_status[j] << " ";
-	}
-	cout << endl;
+	hmm->viterbi_seg(sequence, hidden_status);
+	reverse(hidden_status.begin(), hidden_status.end());
 
-	cout << sequence.size() << " " << hidden_status.size() << endl;
+	string cur = "";
 	for (int j = 0; j < word_len; j ++) {
 		string substr = str.substr(3 * j, 3);
-		cout << substr;
-		if (j < word_len - 1 && (hidden_status[j] == 4 || hidden_status[j] == 3)) {
-			cout << "\\ ";
+		
+		cur += substr;
+		if ((hidden_status[j] == 4 || hidden_status[j] == 3)) {
+			word_seg_result.push_back(cur);
+			cur = "";
 		}
+
 	}
-	cout << endl;
 }
 

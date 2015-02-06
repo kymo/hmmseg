@@ -41,7 +41,7 @@
 #include <cstring>
 #include <exception>
 #include <cmath>
-
+#include <algorithm>
 using namespace std;
 
 class HMM {
@@ -118,5 +118,7 @@ public:
 	// viterbi algorithm to find the most prossible hidden statuses which generate
 	// the given observed data
 	bool viterbi(const vector<int> &observed_seq, vector<int> & hidden_status);	
+	bool viterbi_seg(const vector<int> &observed_seq, vector<int> & hidden_status);	
+	
 };
 

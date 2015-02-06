@@ -52,7 +52,6 @@ bool HMM::load_training_sample(const char* file_name) {
 
 		for (vector<string>::iterator it = split_ret.begin();
 				it !=  split_ret.end(); it ++) {
-			cout << *it << " ";
 			vector<string> cur_split_ret;
 			tag = ":";
 			split(*it, cur_split_ret, tag);
@@ -91,7 +90,7 @@ bool HMM::load_training_sample(const char* file_name) {
 void HMM::calc_confused_matrix() {
 	for (int j = 1; j <= _N; j ++) {
 		for (int k = 1; k <= _T; k ++) {
-			_B[j][k] = 1.0 * (1 + 1.0 * _hid_obv_cnt[j][k]) / _sta_cnt[j];
+			_B[j][k] = 1.0 * (1.0 * _hid_obv_cnt[j][k]) / _sta_cnt[j];
 		}
 	}
 }
@@ -99,7 +98,7 @@ void HMM::calc_confused_matrix() {
 void HMM::calc_tranfer_matrix() {
 	for (int j = 1; j <= _N; j ++) {
 		for (int k = 1; k <= _N; k ++) {
-			_A[j][k] = 1.0 * (1 + 1.0 * _sta_co_cnt[j][k]) / _sta_cnt[j];
+			_A[j][k] = 1.0 * (1.0 * _sta_co_cnt[j][k]) / _sta_cnt[j];
 		}
 	}
 }
@@ -192,13 +191,81 @@ void HMM::statistic_train() {
 	// calculate the transfer matrix
 	calc_tranfer_matrix();
 	// calculate the pi
+	
 	for (int i = 1; i <= _N; i ++) {
 		tot_status_cnt += _sta_cnt[i];
 	}
+
 	for (int i = 1; i <= _N; i ++) {
 		_pi[i] = 1.0 * _sta_cnt[i] / tot_status_cnt;
 	}
 	// save the model
+}
+
+bool HMM::viterbi_seg(const vector<int> &observed_seq, vector<int> &hidden_status) {
+	int T;
+	vector<vector<float> > beta;
+	
+	// opt path saves the optimal path from the source status to the end status
+	// opt_path[i][j] saves the status from which current status transfers can gain the
+	// maximum probability
+	vector<vector<int> > opt_path;
+	float max_value, max_index;
+	T = observed_seq.size();
+	for (int j = 0; j <= T; j ++) {
+		beta.push_back(vector<float>(_N + 1, 0));
+		opt_path.push_back(vector<int>(_N + 1, 0));
+	}
+	
+	for (int j = 1; j <= _N; j ++) {
+		beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
+		//beta[1][j] = _pi[j] * _B[j][observed_seq[0]];
+		opt_path[1][j] = j;
+	}
+
+	for (int t = 2; t <= T; t ++) {
+		for (int i = 1; i <= _N; i ++) {
+			max_value = -1000000;
+			
+			for (int j = 1; j <= _N; j ++) {
+				// float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
+				if ((i == 1 && (j == 3 || j == 4)) ||
+						(i == 2 && (j == 1 || j == 2 || j == 4)) ||
+						(i == 3 && (j == 1 || j == 2 || j == 4)) ||
+				
+						(i == 4 && (j == 3 || j == 4))){	
+				
+				//	float temp_val = beta[t - 1][j] + _A[j][i] * _B[i][observed_seq[t-1]];
+					float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
+					if (temp_val > max_value) {
+						max_value = temp_val;
+						max_index = j;
+						
+					}
+
+				}
+				
+			}
+			beta[t][i] = max_value;
+			opt_path[t][i] = max_index;
+		}
+	}
+
+
+	max_value = 0.0;
+	for (int j = 1; j <= _N; j ++) {
+		if (max_value < beta[T][j] && (j == 3 || j == 4)) {
+			max_value = beta[T][j];
+			max_index = j;
+		}
+	}
+
+	hidden_status.push_back(max_index);
+	for (int j = T; j >= 2; j --) {
+		max_index = opt_path[j][max_index];
+		hidden_status.push_back(max_index);
+	}
+
 }
 
 bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
@@ -217,43 +284,18 @@ bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
 	}
 	
 	for (int j = 1; j <= _N; j ++) {
-		beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
+		//beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
+		beta[1][j] = _pi[j] * _B[j][observed_seq[0]];
 		//cout << beta[1][j] << " " << endl;
 		opt_path[1][j] = j;
 	}
-	cout << "observed sequence:" << endl;
-	for (int j = 0; j < observed_seq.size(); j ++) {
-		cout << observed_seq[j] << " ";
-	}
-	cout << endl;
-
-	cout << "A: " << endl;
-	for (int i = 1; i <= _N; i ++) {
-		for (int j = 1; j <= _N; j ++) {
-			cout << _A[i][j] << " ";
-		}
-		cout << endl;
-	}
-
-	cout << "B: " << endl;
-	for (int i = 1; i <= _N; i ++) {
-		for (int j = 1; j <= _T; j ++) {
-			cout << _B[i][j] << " ";
-		}
-		cout << endl;
-	}
-	
-	cout << "Pi: " << endl;
-	for (int i = 1; i <= _N; i ++) {
-		cout << _pi[i] << " ";
-	}
-	cout << endl;
 
 	for (int t = 2; t <= T; t ++) {
 		for (int i = 1; i <= _N; i ++) {
 			max_value = -1000000;
 			for (int j = 1; j <= _N; j ++) {
-				float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
+				// float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
+				float temp_val = beta[t - 1][j] + _A[j][i] * _B[i][observed_seq[t-1]];
 				if (temp_val > max_value) {
 					max_value = temp_val;
 					max_index = j;
@@ -262,14 +304,6 @@ bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
 			beta[t][i] = max_value;
 			opt_path[t][i] = max_index;
 		}
-	}
-
-	cout << "Beta :" << endl;
-	for (int t = 1; t <= T; t ++) {
-		for (int k = 1; k <= _N; k ++) {
-			cout << beta[t][k] << " ";
-		}
-		cout << endl;
 	}
 
 	max_value = 0.0;
