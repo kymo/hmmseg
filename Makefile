@@ -1,10 +1,8 @@
+
 cc=g++
 target=trie
 obj=obj/main.o obj/wordseg.o obj/hmm.o obj/trie.o
 CFLAGS= -O2 -I ./include
-
-
-
 
 $(target) : $(obj)
 	$(cc) -o $(target) $(obj)

@@ -1,6 +1,13 @@
-#ifndef _WORDSEG_H_
-#define _WORDSEG_H_
-
+// Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Aron
+// contact: kymowind@gmail.com www.idiotaron.org
+//
+// This file is part of hmmseg
+//
+// hmmseg is a segmentation module conbined hidden markov model with
+// maximum match segmentation, you can redistribute it and modify it
+// under the term of the GNU Genural Public License as published by
+// the free software Foundation, either version of 3 of the Lisence
+//
 // thisfile is used to do wordseg model training and also
 // supply an interface to operate word segmentation .
 // the training file comes from the http://sighan.cs.uchicago.edu/bakeoff2005/
@@ -13,10 +20,11 @@
 // E : current single word is the tail of the lexicon which
 //		means that a segmentation has been down
 // S : current single word is single~
+//
+// wordseg.h: the definiton of the main model 
 
-// auth : aron
-// date : 2015-02-20
-
+#ifndef _WORDSEG_H_
+#define _WORDSEG_H_
 
 #include <iostream>
 #include <string>
@@ -25,38 +33,37 @@
 #include <vector>
 #include <fstream>
 #include <map>
-
+#include <exception>
 #include "hmm.h"
 
-using namespace std;
-
+namespace hmmseg {
 class WordSeg {
 
 private:
 
-	map<string, int> word_to_index;
-	map<char, int> status_to_index;
+	std::map<std::string, int> word_to_index;
+	std::map<char, int> status_to_index;
 	HMM *hmm;
 
-	//hash_map<string, int> word_to_index;
-	//hash_map<string, int> status_to_index;
-	// split the string
-	void split(string &s, vector<string> &split_ret, const string &tag);
+	//hash_map<std::string, int> word_to_index;
+	//hash_map<std::string, int> status_to_index;
+	// split the std::string
+	void split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag);
 	
 	// get word index
 	void get_word_index(int &cur_word_cnt,
-			vector<int> &str_indexes,
-			const string &str);
+			std::vector<int> &str_indexes,
+			const std::string &str);
 	
-	// int to string
-	string int_to_str(int val);
+	// int to std::string
+	std::string int_to_str(int val);
 
 	// init the dict
 	bool init_dict(const char *dict_file);
 	
 	
-	// clean the string
-	void clean_str(string &str);										
+	// clean the std::string
+	void clean_str(std::string &str);										
 
 public:
 	WordSeg() {}	
@@ -72,8 +79,9 @@ public:
 	void save_dict(const char *file);
 
 	// segment the word
-	void segment(string str, vector<string> &word_seg_result);
+	void segment(std::string str, std::vector<std::string> &word_seg_result);
 
 };
 
+}
 #endif

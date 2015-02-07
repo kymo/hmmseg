@@ -1,11 +1,26 @@
-
-// trie source file 
+// Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Aron
+// contact: kymowind@gmail.com www.idiotaron.org
+//
+// This file is part of hmmseg
+//
+// hmmseg is a segmentation module conbined hidden markov model with
+// maximum match segmentation, you can redistribute it and modify it
+// under the term of the GNU Genural Public License as published by
+// the free software Foundation, either version of 3 of the Lisence
+//
+//
+// trie.cpp: the definiton of the tree structure to save the dict for
+//		minimize the store of the data and quick search for the word 
+//		in the dict.
+//
 
 #include "trie.h"
 
-bool Trie::split_ch_words(const string &line, vector<string> &words) {
-	string cn_word = "";
-	string not_cn_word = "";
+namespace hmmseg {
+
+bool Trie::split_ch_words(const std::string &line, std::vector<std::string> &words) {
+	std::string cn_word = "";
+	std::string not_cn_word = "";
 	for (int i = 0; i < line.length(); i ++) {
 		//if (line[i] >= 0x4e00 && line[i] <= 0x96a5) {
 		if (line[i] < 0) {
@@ -42,13 +57,13 @@ void Trie::set_string_node(bool is_string_node) {
 	_is_string_node = is_string_node;
 }
 
-void Trie::build_tree(Trie *&root, const vector<string> &words, int cur) {
+void Trie::build_tree(Trie *&root, const std::vector<std::string> &words, int cur) {
 
 	if (cur >= words.size()) return;
-	string cur_word = words[cur];
+	std::string cur_word = words[cur];
 	
 	if (root->_child_trees.find(cur_word) == root->_child_trees.end()) {
-		root->_child_trees.insert(pair<string, Trie*>(cur_word, new Trie(cur_word)));
+		root->_child_trees.insert(std::pair<std::string, Trie*>(cur_word, new Trie(cur_word)));
 	}
 	
 	if (cur + 1 == words.size()) {
@@ -60,37 +75,37 @@ void Trie::build_tree(Trie *&root, const vector<string> &words, int cur) {
 
 
 void Trie::display(Trie *&trie) {
-	queue<Trie*> q;
+	std::queue<Trie*> q;
 	q.push(trie);
 	while (! q.empty()) {
 		Trie *tp = q.front();
 		q.pop();
 		if (tp->_word != "") {
-			cout << "father: " << tp->_word << endl;
+			std::cout << "father: " << tp->_word << std::endl;
 		} else {
-			cout << "father: root!" << endl;
+			std::cout << "father: root!" << std::endl;
 		}
-		for (map<string, Trie*>::iterator it = tp->_child_trees.begin(); it != tp->_child_trees.end(); it ++) {
-			cout << it->first << " ";
+		for (std::map<std::string, Trie*>::iterator it = tp->_child_trees.begin(); it != tp->_child_trees.end(); it ++) {
+			std::cout << it->first << " ";
 			q.push(it->second);
 		}
-		cout << endl;
+		std::cout << std::endl;
 	}
 
 }
 
 bool Trie::load_dict(const char* file_name) {
 	// TODO judge the encoding of the file
-	ifstream fis(file_name);
-	string line;
+	std::ifstream fis(file_name);
+	std::string line;
 	int line_num;
 	line_num = 0;
 	_root = new Trie();
-	map<string, int> dic;
+	std::map<std::string, int> dic;
 	while (getline(fis, line)) {
-		vector<string> words;
+		std::vector<std::string> words;
 		if (! split_ch_words(line, words)) {
-			cerr << "Error when split the words in line : " << line_num << endl;
+			std::cerr << "Error when split the words in line : " << line_num << std::endl;
 			return false;
 		}
 		build_tree(_root, words, 0);
@@ -98,10 +113,10 @@ bool Trie::load_dict(const char* file_name) {
 	return true;
 }
 
-void Trie::simple_seg(string &str) { 
-	vector<string> ret;
-	vector<string> words;
-	string trunk;
+void Trie::simple_seg(std::string &str) { 
+	std::vector<std::string> ret;
+	std::vector<std::string> words;
+	std::string trunk;
 	int start , ends;
 	split_ch_words(str, words);
 	start = 0, ends = words.size();
@@ -130,7 +145,7 @@ void Trie::simple_seg(string &str) {
 
 
 bool Trie::search(Trie *&tree, 
-		const vector<string> &words, 
+		const std::vector<std::string> &words, 
 		int i, int j) {
 	if (i > j) return false;
 	if (i == j) {
@@ -144,3 +159,5 @@ bool Trie::search(Trie *&tree,
 	}
 	return search(tree->_child_trees[words[i]], words, i + 1, j);
 }
+}
+

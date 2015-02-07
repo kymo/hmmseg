@@ -1,12 +1,39 @@
-// hidden markov model implementation file
-// auth : aron @ whu
-// date : 2015-02-02
+// Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Aron
+// contact: kymowind@gmail.com www.idiotaron.org
+//
+// This file is part of hmmseg
+//
+// hmmseg is a segmentation module conbined hidden markov model with
+// maximum match segmentation, you can redistribute it and modify it
+// under the term of the GNU Genural Public License as published by
+// the free software Foundation, either version of 3 of the Lisence
+//
+// hmm.cpp: main file for hmmseg
+// Based on the following blogs:
+//		http://www.cnblogs.com/zhangchaoyang/articles/2571110.html
+//		http://www.52nlp.cn/itenyh
+//
+
+
 
 #include "hmm.h"
 
-void HMM::split(string &s, vector<string> &split_ret, const string &tag) {
+namespace hmmseg {
+
+void HMM::init_space() {
+	for (int i = 0; i <= _N; i ++) {
+		_A.push_back(std::vector<float>(_N + 1, 0.0));
+		_sta_co_cnt.push_back(std::vector<int>(_N + 1, 0));
+		_hid_obv_cnt.push_back(std::vector<int>(_T + 1, 0));
+		_B.push_back(std::vector<float>(_T + 1, 0.0));
+		_pi.push_back(0.0);
+		_sta_cnt.push_back(0);
+	}
+}
+
+void HMM::split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag) {
 	split_ret.clear();
-	if (s.find(tag) == string::npos) {
+	if (s.find(tag) == std::string::npos) {
 		if (s.length() != 0) {
 			split_ret.push_back(s);
 		}
@@ -14,8 +41,8 @@ void HMM::split(string &s, vector<string> &split_ret, const string &tag) {
 	}
 	int cur_pos = 0, find_pos = 0;
 	s += tag;
-	while ((find_pos = s.find(tag, cur_pos)) != string::npos) {
-		string subs = s.substr(cur_pos, find_pos - cur_pos);
+	while ((find_pos = s.find(tag, cur_pos)) != std::string::npos) {
+		std::string subs = s.substr(cur_pos, find_pos - cur_pos);
 		if (subs.size() != 0) {
 			split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
 		}
@@ -23,7 +50,7 @@ void HMM::split(string &s, vector<string> &split_ret, const string &tag) {
 	}
 }
 
-bool HMM::str_to_number(int &val, const string &str) {
+bool HMM::str_to_number(int &val, const std::string &str) {
 	val = 0;
 	int ten = 1;
 	for (int i = (str.length()) - 1; i >= 0; i --) {
@@ -38,10 +65,10 @@ bool HMM::str_to_number(int &val, const string &str) {
 }
 
 bool HMM::load_training_sample(const char* file_name) {
-	ifstream fis(file_name);
-	string line, tag;
+	std::ifstream fis(file_name);
+	std::string line, tag;
 	int line_num = 0;
-	vector<string> split_ret;
+	std::vector<std::string> split_ret;
 	int obs_seq_id, hid_sta_id; 
 	while (getline(fis, line)) {
 		int last_hid_status = -1;
@@ -50,28 +77,28 @@ bool HMM::load_training_sample(const char* file_name) {
 		split(line, split_ret, tag);
 		if (split_ret.size() == 0) continue;
 
-		for (vector<string>::iterator it = split_ret.begin();
+		for (std::vector<std::string>::iterator it = split_ret.begin();
 				it !=  split_ret.end(); it ++) {
-			vector<string> cur_split_ret;
+			std::vector<std::string> cur_split_ret;
 			tag = ":";
 			split(*it, cur_split_ret, tag);
 			if (cur_split_ret.size() == 0) continue;
 			if (cur_split_ret.size() != 2) {
-				cerr << "Error when loading training sample : data format is not legal in line" <<
-					line_num << endl;
+				std::cerr << "Error when loading training sample : data format is not legal in line" <<
+					line_num << std::endl;
 				return false;
 			}
 			if (! str_to_number(obs_seq_id, cur_split_ret[1]) ||
 					! str_to_number(hid_sta_id, cur_split_ret[0])) {
-				cerr << "Error when loading training sample : data type is not legal in line " <<
-					line_num << endl;
+				std::cerr << "Error when loading training sample : data type is not legal in line " <<
+					line_num << std::endl;
 				return false;
 			}
 
 
 			if (obs_seq_id > _T || hid_sta_id > _N) {
-				cerr << "Error when loading training sample : observed sequence id or hidden status id is not legal in line " 
-					<< line_num << endl;
+				std::cerr << "Error when loading training sample : observed sequence id or hidden status id is not legal in line " 
+					<< line_num << std::endl;
 				return false;
 
 			}
@@ -105,9 +132,9 @@ void HMM::calc_tranfer_matrix() {
 
 
 void HMM::save_model(const char *file_name) {
-	ofstream fos(file_name);	
+	std::ofstream fos(file_name);	
 	// save _T, _N
-	fos << _T << "\t" << _N << endl;
+	fos << _T << "\t" << _N << std::endl;
 	// save pi
 	for (int i = 1; i <= _N; i ++) {
 		if (i < _N) {
@@ -122,7 +149,7 @@ void HMM::save_model(const char *file_name) {
 			if (j < _N) {
 				fos << _A[i][j] << "\t";
 			} else {
-				fos << _A[i][j] << endl;
+				fos << _A[i][j] << std::endl;
 			}
 		}
 	}
@@ -132,7 +159,7 @@ void HMM::save_model(const char *file_name) {
 			if (j < _T) {
 				fos << _B[i][j] << "\t";
 			} else {
-				fos << _B[i][j] << endl;
+				fos << _B[i][j] << std::endl;
 			}
 		}
 	}
@@ -141,11 +168,11 @@ void HMM::save_model(const char *file_name) {
 
 bool HMM::load_model(const char *file_name) {
 	// load _T and _N
-	ifstream fis(file_name);
+	std::ifstream fis(file_name);
 	try {
 		fis >> _T >> _N;
-	} catch(exception &e) {
-		cerr << "Error when loading model : loading T & N error!" << endl;
+	} catch(std::exception &e) {
+		std::cerr << "Error when loading model : loading T & N error!" << std::endl;
 		return false;
 	}
 	init_space();
@@ -154,8 +181,8 @@ bool HMM::load_model(const char *file_name) {
 		for (int j = 1; j <= _N; j ++) {
 			fis >> _pi[j];
 		}
-	} catch (exception &e) {
-		cerr << "Error when loading model : loading pi error!" << endl;
+	} catch (std::exception &e) {
+		std::cerr << "Error when loading model : loading pi error!" << std::endl;
 		return false;
 	}
 	// loading transfer matrix
@@ -165,8 +192,8 @@ bool HMM::load_model(const char *file_name) {
 				fis >> _A[j][k];
 			}
 		}
-	} catch (exception &e) {
-		cerr << "Error when loading model : loading transfer matrix error! " << endl;
+	} catch (std::exception &e) {
+		std::cerr << "Error when loading model : loading transfer matrix error! " << std::endl;
 		return false;
 	}
 	// loading confused matrix
@@ -176,8 +203,8 @@ bool HMM::load_model(const char *file_name) {
 				fis >> _B[j][k];
 			}
 		}
-	} catch (exception &e) {
-		cerr << "Error when loading model : loading confused model error! " << endl;
+	} catch (std::exception &e) {
+		std::cerr << "Error when loading model : loading confused model error! " << std::endl;
 		return false;
 	}
 	return true;
@@ -202,19 +229,19 @@ void HMM::statistic_train() {
 	// save the model
 }
 
-bool HMM::viterbi_seg(const vector<int> &observed_seq, vector<int> &hidden_status) {
+bool HMM::viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> &hidden_status) {
 	int T;
-	vector<vector<float> > beta;
+	std::vector<std::vector<float> > beta;
 	
 	// opt path saves the optimal path from the source status to the end status
 	// opt_path[i][j] saves the status from which current status transfers can gain the
 	// maximum probability
-	vector<vector<int> > opt_path;
+	std::vector<std::vector<int> > opt_path;
 	float max_value, max_index;
 	T = observed_seq.size();
 	for (int j = 0; j <= T; j ++) {
-		beta.push_back(vector<float>(_N + 1, 0));
-		opt_path.push_back(vector<int>(_N + 1, 0));
+		beta.push_back(std::vector<float>(_N + 1, 0));
+		opt_path.push_back(std::vector<int>(_N + 1, 0));
 	}
 	
 	for (int j = 1; j <= _N; j ++) {
@@ -263,25 +290,25 @@ bool HMM::viterbi_seg(const vector<int> &observed_seq, vector<int> &hidden_statu
 
 }
 
-bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
+bool HMM::viterbi(const std::vector<int> &observed_seq, std::vector<int> &hidden_status) {
 	int T;
-	vector<vector<float> > beta;
+	std::vector<std::vector<float> > beta;
 	
 	// opt path saves the optimal path from the source status to the end status
 	// opt_path[i][j] saves the status from which current status transfers can gain the
 	// maximum probability
-	vector<vector<int> > opt_path;
+	std::vector<std::vector<int> > opt_path;
 	float max_value, max_index;
 	T = observed_seq.size();
 	for (int j = 0; j <= T; j ++) {
-		beta.push_back(vector<float>(_N + 1, 0));
-		opt_path.push_back(vector<int>(_N + 1, 0));
+		beta.push_back(std::vector<float>(_N + 1, 0));
+		opt_path.push_back(std::vector<int>(_N + 1, 0));
 	}
 	
 	for (int j = 1; j <= _N; j ++) {
 		//beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
 		beta[1][j] = _pi[j] * _B[j][observed_seq[0]];
-		//cout << beta[1][j] << " " << endl;
+		//cout << beta[1][j] << " " << std::endl;
 		opt_path[1][j] = j;
 	}
 
@@ -317,5 +344,7 @@ bool HMM::viterbi(const vector<int> &observed_seq, vector<int> &hidden_status) {
 }
 
 void HMM::em_train() {
+
+}
 
 }

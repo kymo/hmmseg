@@ -4,6 +4,9 @@ ompiled Object files
 *.o
 *.obj
 
+*.swp
+*.swo
+
 # Precompiled Headers
 *.gch
 *.pch
