@@ -113,6 +113,7 @@ bool Trie::load_dict(const char* file_name) {
 	return true;
 }
 
+
 void Trie::simple_seg(std::string &str) { 
 	std::vector<std::string> ret;
 	std::vector<std::string> words;
@@ -140,14 +141,14 @@ void Trie::simple_seg(std::string &str) {
 			ret.push_back(words[start]);	
 			start += 1;
 		} 
-	}	
+	}
 }
 
 
 bool Trie::search(Trie *&tree, 
 		const std::vector<std::string> &words, 
 		int i, int j) {
-	if (i > j) return false;
+	if (i > j) return false;	
 	if (i == j) {
 		if (tree->_child_trees.find(words[i]) != tree->_child_trees.end()) {
 			return tree->_child_trees[words[i]]->_is_string_node;
@@ -157,6 +158,7 @@ bool Trie::search(Trie *&tree,
 	if (tree->_child_trees.find(words[i]) == tree->_child_trees.end()) {
 		return false;
 	}
+	
 	return search(tree->_child_trees[words[i]], words, i + 1, j);
 }
 }

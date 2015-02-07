@@ -1,4 +1,3 @@
-
 // Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Aron
 // contact: kymowind@gmail.com www.idiotaron.org
 //
@@ -12,9 +11,9 @@
 // wordseg.cpp: the definiton of the wordseg 
 // 
 
+
 #include "wordseg.h"
 namespace hmmseg {
-
 
 void WordSeg::split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag) {
 	split_ret.clear();
@@ -38,11 +37,11 @@ void WordSeg::get_word_index(int &cur_word_cnt,
 	int word_len = str.size() / 3;
 	for (int i = 0; i < word_len; i ++) {
 		std::string sub = str.substr(i * 3, 3);
-		if (word_to_index.find(sub) == word_to_index.end()) {
+		if (_word_to_index.find(sub) == _word_to_index.end()) {
 			cur_word_cnt += 1;
-			word_to_index[sub] = cur_word_cnt;
+			_word_to_index[sub] = cur_word_cnt;
 		}
-		str_indexes.push_back(word_to_index[sub]);
+		str_indexes.push_back(_word_to_index[sub]);
 	}
 }
 
@@ -60,7 +59,7 @@ std::string WordSeg::int_to_str(int val) {
 void WordSeg::load_data(const char *file_name) {
 	std::string status = "BMES";
 	for (int i = 1; i <= 4; i ++) {
-		status_to_index[status[i - 1]] = i;
+		_status_to_index[status[i - 1]] = i;
 	}
 	std::ifstream fis(file_name);
 	std::string line, tag;
@@ -102,32 +101,24 @@ void WordSeg::load_data(const char *file_name) {
 				all_ans += ",";
 			}
 		}
-
-		int len = test.size();
-		for (int i = 0; i < len - 1; i ++) {
-			if (test[i] == 1 && test[i + 1] == 1) {
-				//std::cout << line << std::endl;
-				break;
-			}
-		}
-	
 		std::cout << all_ans << std::endl;
 	}
+
 }
 
 void WordSeg::save_dict(const char *file) {
 	std::ofstream fos(file);
 	// save number
-	fos << "4:" << word_to_index.size() << std::endl;
+	fos << "4:" << _word_to_index.size() << std::endl;
 	// save status
-	for (std::map<char, int>::iterator it = status_to_index.begin();
-			it != status_to_index.end(); it ++) {
+	for (std::map<char, int>::iterator it = _status_to_index.begin();
+			it != _status_to_index.end(); it ++) {
 		fos << it->first << ":" << it->second << std::endl;
 	}
 
 	// save word index
-	for (std::map<std::string, int>::iterator it = word_to_index.begin();
-			it != word_to_index.end(); it ++) {
+	for (std::map<std::string, int>::iterator it = _word_to_index.begin();
+			it != _word_to_index.end(); it ++) {
 		fos << it->first << ":" << it->second << std::endl;
 	}
 	fos.close();
@@ -147,16 +138,16 @@ bool WordSeg::init_dict(const char *dict_file) {
 		for (int i = 0; i < n; i ++) {
 			fis >> str;
 			split(str, split_ret, tag);
-			status_to_index[split_ret[0][0]] = atoi((split_ret[1]).c_str());
+			_status_to_index[split_ret[0][0]] = atoi((split_ret[1]).c_str());
 		}
 		
 		for (int j = 0; j < t;j ++) {
 			fis >> str;
 			split(str, split_ret, tag);
-			word_to_index[split_ret[0]] = atoi(split_ret[1].c_str());
+			_word_to_index[split_ret[0]] = atoi(split_ret[1].c_str());
 
 		}
-	}catch(std::exception &e) {
+	} catch (std::exception &e) {
 		std::cerr << "Error when loading dict!" << std::endl;
 		return false;
 	}
@@ -188,7 +179,7 @@ void WordSeg::segment(std::string str, std::vector<std::string> &word_seg_result
 
 	for (int i = 0; i < word_len; i ++) {
 		std::string substr = str.substr(3 * i, 3);
-		sequence.push_back(word_to_index[substr]);
+		sequence.push_back(_word_to_index[substr]);
 	}
 
 	std::vector<int> hidden_status;

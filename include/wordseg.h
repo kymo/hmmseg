@@ -23,8 +23,8 @@
 //
 // wordseg.h: the definiton of the main model 
 
-#ifndef _WORDSEG_H_
-#define _WORDSEG_H_
+#ifndef WORDSEG_H_
+#define WORDSEG_H_
 
 #include <iostream>
 #include <string>
@@ -41,12 +41,10 @@ class WordSeg {
 
 private:
 
-	std::map<std::string, int> word_to_index;
-	std::map<char, int> status_to_index;
-	HMM *hmm;
+	std::map<std::string, int> _word_to_index;	// word to index map
+	std::map<char, int> _status_to_index;		// status to index map
+	HMM*	_hmm;								// hmm model
 
-	//hash_map<std::string, int> word_to_index;
-	//hash_map<std::string, int> status_to_index;
 	// split the std::string
 	void split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag);
 	
@@ -59,8 +57,7 @@ private:
 	std::string int_to_str(int val);
 
 	// init the dict
-	bool init_dict(const char *dict_file);
-	
+	bool init_dict(const char *dict_file);	
 	
 	// clean the std::string
 	void clean_str(std::string &str);										
@@ -69,17 +66,40 @@ public:
 	WordSeg() {}	
 	virtual ~WordSeg() {}
 
-	// init the model and dict
-	bool init_env(const char *dict_file, const char *model_path);
-	// load data from training sample file  and process the data to the following 
-	// format : type:word whose meaning has been explained as above. 
+
+
+	// brief: load data from training sample file  and process the data to the following 
+	// note : the format in the file
+	//		type:word whose meaning has been explained as above. 
+	// param: 
+	//		file_name	the name of the segmented corpus in which a line indicating the manual segmented outcome of a paragraph
+	// return:
+	//		None
 	void load_data(const char *file_name); 
 
-	// save the word_to_index & status_to_index
-	void save_dict(const char *file);
+	// brief : save the word_to_index & status_to_index
+	// param :
+	//		file_name : the file gona to save the word dict
+	// return :
+	//		None
+	void save_dict(const char *file_name);
 
-	// segment the word
-	void segment(std::string str, std::vector<std::string> &word_seg_result);
+	// brief :	init the model and dict
+	// param :
+	//		dict_file : the file that saved the word's index
+	//		model_path : the file contains the hmm model
+	// return :
+	// 		true  : init enviroment successed
+	//		false : init enviroment failed
+	bool init_env(const char *dict_file, const char *model_path);
+	
+	// brief : segment the word
+	// param :
+	//		str : the string which gona to be segmented
+	//		word_seg_result : segment results
+	// return :
+	//		None
+	void segment(std::string &str, std::vector<std::string> &word_seg_result);
 
 };
 
