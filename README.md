@@ -1,2 +1,0 @@
-# hmmseg
-hmm for segmentation
