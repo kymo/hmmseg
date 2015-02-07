@@ -34,6 +34,8 @@
 #include <fstream>
 #include <map>
 #include <exception>
+
+#include "trie.h"
 #include "hmm.h"
 
 namespace hmmseg {
@@ -44,7 +46,7 @@ private:
 	std::map<std::string, int> _word_to_index;	// word to index map
 	std::map<char, int> _status_to_index;		// status to index map
 	HMM*	_hmm;								// hmm model
-
+	Trie*	_trie;								// trie tree
 	// split the std::string
 	void split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag);
 	
@@ -58,15 +60,11 @@ private:
 
 	// init the dict
 	bool init_dict(const char *dict_file);	
-	
-	// clean the std::string
-	void clean_str(std::string &str);										
+
 
 public:
 	WordSeg() {}	
-	virtual ~WordSeg() {}
-
-
+	~WordSeg() {}
 
 	// brief: load data from training sample file  and process the data to the following 
 	// note : the format in the file
@@ -91,8 +89,9 @@ public:
 	// return :
 	// 		true  : init enviroment successed
 	//		false : init enviroment failed
-	bool init_env(const char *dict_file, const char *model_path);
-	
+	bool init_env(const char *dict_file, 
+			const char *model_path,	
+			const char *trie_dict_paht);
 	// brief : segment the word
 	// param :
 	//		str : the string which gona to be segmented
@@ -101,6 +100,13 @@ public:
 	//		None
 	void segment(std::string &str, std::vector<std::string> &word_seg_result);
 
+	// brief : segment method conbined the mm
+	// param :
+	//		str : the string which gona to be segmented
+	//		word_seg_result : segment results
+	// return :
+	//		None
+	void segment_mm(std::string &str, std::vector<std::string> &word_seg_results);
 };
 
 }

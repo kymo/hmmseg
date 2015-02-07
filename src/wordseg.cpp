@@ -109,17 +109,21 @@ void WordSeg::load_data(const char *file_name) {
 void WordSeg::save_dict(const char *file) {
 	std::ofstream fos(file);
 	// save number
-	fos << "4:" << _word_to_index.size() << std::endl;
+	try {
+		fos << "4:" << _word_to_index.size() << std::endl;
 	// save status
 	for (std::map<char, int>::iterator it = _status_to_index.begin();
 			it != _status_to_index.end(); it ++) {
 		fos << it->first << ":" << it->second << std::endl;
 	}
-
 	// save word index
 	for (std::map<std::string, int>::iterator it = _word_to_index.begin();
 			it != _word_to_index.end(); it ++) {
 		fos << it->first << ":" << it->second << std::endl;
+	}
+	} catch(std::exception &e) {
+		std::cerr << "Error when saveing the word dict !" << std::endl;
+		return ;
 	}
 	fos.close();
 }
@@ -155,25 +159,24 @@ bool WordSeg::init_dict(const char *dict_file) {
 }
 
 bool WordSeg::init_env(const char *dict_file,
-		const char *model_path) {
+		const char *model_path,
+		const char *trie_dict_path) {
 	
 	hmm = new HMM();
+	trie = new Trie();
 	if (! hmm->load_model(model_path)) {
 		return false;
 	}
 	if (! init_dict(dict_file)) {
 		return false;
 	}
+	if (! trie->load_dict(trie_dict_path)) {
+		return false
+	}
 	return true;
 }
 
-void WordSeg::clean_str(std::string &str) {
-
-}
-
-void WordSeg::segment(std::string str, std::vector<std::string> &word_seg_result) {
-	// TODO clean std::string
-	clean_str(str);
+void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_result) {
 	int word_len = str.length() / 3;
 	std::vector<int> sequence;
 
@@ -193,6 +196,23 @@ void WordSeg::segment(std::string str, std::vector<std::string> &word_seg_result
 		if ((hidden_status[j] == 4 || hidden_status[j] == 3)) {
 			word_seg_result.push_back(cur);
 			cur = "";
+		}
+	}
+}
+
+void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_results) {
+
+	vector<vector<string> > results;
+	if (! trie->find_all_results(str, results)) {
+	
+	}
+	for (int i = 0; i < results; i ++) {
+		for (int j = 0; j < results[i].size(); j ++) {
+			if (j + 1 < results[i].size()) {
+				cout << results[i][j] << " ";
+			} else {
+				cout << results[i][j] << endl;
+			}
 		}
 	}
 }

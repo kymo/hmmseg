@@ -35,34 +35,54 @@ private:
 	Trie* _root;
 
 	std::map<std::string, Trie*> _child_trees;
-	
-	// build a trie tree from the dict
+	// brief : build a trie tree from the dict
+	// param : 
+	// 		trie : a trie object
+	//		words : a vector stored the ch words
+	//		cur : the index of current word 
+	// return :
+	// 		None
 	void build_tree(Trie *&trie, const std::vector<std::string> &words, int cur);
-	// split the words in a std::string
+	
+	// brief : split the chinese word to single one
+	// param : 
+	//		line : the chinese string
+	//		words : a vector store the outcome
+	// return : 
+	//		None
 	bool split_ch_words(const std::string &line, std::vector<std::string> &words);
 
 public:
 	bool _is_string_node;
 	std::string _word;
+	
 	Trie() : _is_string_node(false) {}
-	Trie(std::string word) : _word(word), _is_string_node(false) {
-	}
-
+	Trie(std::string word) : _word(word), _is_string_node(false) {}
 	// display trees
 	void display(Trie *&trie);
 
-	// set std::string node
+	// brief : set the node status
 	void set_string_node(bool is_string_node);
 
-	// load dict()
-	// each word in a line which's decoding as UTF-8
+	// brief : load the dict to build a tree 
+	// note  : each word in a line which's decoding as UTF-8
+	// param : 
+	//		file_name : the dict file name
+	// return :
+	//		false : load dict failed
+	//		true : load dict successed
 	bool load_dict(const char* file_name);
 
-	// simple segment
+	// brief : simple segment method just using the maximum match strategy
+	// param :
+	//		str : the string gona to be segmented
+	// return :
+	//		None
 	void simple_seg(std::string &str);
 
-	// search whether the current word is a child node of the
-	// current node thus judging whether to end the search
+	// brief : search whether the current word is a child node of the 
+	//		current node thus judging whether to end the search
+	
 	bool search(Trie * &tree, const std::vector<std::string> &word, int i, int j);
 
 };
