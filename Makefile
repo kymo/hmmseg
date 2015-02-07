@@ -1,6 +1,5 @@
-
 cc=g++
-target=trie
+target=wordseg
 obj=obj/main.o obj/wordseg.o obj/hmm.o obj/trie.o
 CFLAGS= -O2 -I ./include
 

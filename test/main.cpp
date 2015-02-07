@@ -72,17 +72,18 @@ void test_word_seg(int argv, char *argc[]) {
 }
 
 void test_seg_word(int argv, char *argc[]) {
-	if (argv < 4) {
-		std::cout << "Usage ./wordseg [dict file] [model file] [test file]" << std::endl;
+	if (argv < 5) {
+		std::cout << "Usage ./wordseg [dict file] [model file] [trie_file] [test file]" << std::endl;
 		return ;
 	}
 	WordSeg *word_seg = new WordSeg();
-	word_seg->init_env(argc[1], argc[2]);
-	std::ifstream fis(argc[3]);
+	word_seg->init_env(argc[1], argc[2], argc[3]);
+	std::ifstream fis(argc[4]);
 	std::string line;
 	while (getline(fis, line)) {
 		std::vector<std::string> results;
-		word_seg->segment(line, results);
+		word_seg->segment_mm(line, results);
+		/*
 		int len_ret = results.size();
 		for (int i = 0; i < len_ret; i ++) {
 			if (i < len_ret - 1) {
@@ -91,6 +92,7 @@ void test_seg_word(int argv, char *argc[]) {
 				std::cout << results[i] << std::endl;
 			}
 		}
+		*/
 	}
 }
 
@@ -108,8 +110,8 @@ void test_trie_tree(int argv, char* argc[]) {
 int main(int argv, char *argc[]) {
 	// test_train_module(argv, argc);
 	// test_word_seg(argv, argc);     
-	// test_seg_word(argv, argc);
+    test_seg_word(argv, argc);
 	// test_decode_module(argv, argc);
-	test_trie_tree(argv, argc);
+	// test_trie_tree(argv, argc);
 	return 0;
 }

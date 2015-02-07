@@ -11,8 +11,7 @@
 // In the project of hmmseg, we use the trie tree to store the dict
 // so as to reduce the memory which speed up the search for word in
 //
-// hmm.h: the definiton of the main model 
-
+// trie.h: the definiton of the tree
 
 #ifndef __TRIE_H_
 #define __TRIE_H_
@@ -33,7 +32,6 @@ class Trie {
 private:
 
 	Trie* _root;
-
 	std::map<std::string, Trie*> _child_trees;
 	// brief : build a trie tree from the dict
 	// param : 
@@ -60,6 +58,23 @@ public:
 	Trie(std::string word) : _word(word), _is_string_node(false) {}
 	// display trees
 	void display(Trie *&trie);
+
+
+	// brief : given the string, find out all the possible segment result 
+	// Param : 
+	//		str string stored all the results
+	//		results vector stored the results
+	// return :
+	// 		None
+	bool find_all_results(std::string &str, 
+			std::vector<std::vector<std::string> > &results);
+	
+	// brief : dfs seach
+	void dfs_search(int i, int j,
+			Trie *&tree,
+			const std::vector<std::string> &words,
+			std::vector<std::string> &temp_results,
+			std::vector<std::vector<std::string> > &results) ;
 
 	// brief : set the node status
 	void set_string_node(bool is_string_node);

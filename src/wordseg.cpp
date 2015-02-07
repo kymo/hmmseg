@@ -162,16 +162,16 @@ bool WordSeg::init_env(const char *dict_file,
 		const char *model_path,
 		const char *trie_dict_path) {
 	
-	hmm = new HMM();
-	trie = new Trie();
-	if (! hmm->load_model(model_path)) {
+	_hmm = new HMM();
+	_trie = new Trie();
+	if (! _hmm->load_model(model_path)) {
 		return false;
 	}
 	if (! init_dict(dict_file)) {
 		return false;
 	}
-	if (! trie->load_dict(trie_dict_path)) {
-		return false
+	if (! _trie->load_dict(trie_dict_path)) {
+		return false;
 	}
 	return true;
 }
@@ -186,7 +186,7 @@ void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_resul
 	}
 
 	std::vector<int> hidden_status;
-	hmm->viterbi_seg(sequence, hidden_status);
+	_hmm->viterbi_seg(sequence, hidden_status);
 	reverse(hidden_status.begin(), hidden_status.end());
 
 	std::string cur = "";
@@ -202,16 +202,16 @@ void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_resul
 
 void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_results) {
 
-	vector<vector<string> > results;
-	if (! trie->find_all_results(str, results)) {
+	std::vector<std::vector<std::string> > results;
+	if (! _trie->find_all_results(str, results)) {
 	
 	}
-	for (int i = 0; i < results; i ++) {
+	for (int i = 0; i < results.size(); i ++) {
 		for (int j = 0; j < results[i].size(); j ++) {
 			if (j + 1 < results[i].size()) {
-				cout << results[i][j] << " ";
+				std::cout << results[i][j] << " ";
 			} else {
-				cout << results[i][j] << endl;
+				std::cout << results[i][j] << std::endl;
 			}
 		}
 	}
