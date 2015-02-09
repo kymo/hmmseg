@@ -17,7 +17,7 @@
 
 
 #include "hmm.h"
-
+#include "util.h" 
 namespace hmmseg {
 
 void HMM::init_space() {
@@ -29,39 +29,6 @@ void HMM::init_space() {
 		_pi.push_back(0.0);
 		_sta_cnt.push_back(0);
 	}
-}
-
-void HMM::split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag) {
-	split_ret.clear();
-	if (s.find(tag) == std::string::npos) {
-		if (s.length() != 0) {
-			split_ret.push_back(s);
-		}
-		return ;
-	}
-	int cur_pos = 0, find_pos = 0;
-	s += tag;
-	while ((find_pos = s.find(tag, cur_pos)) != std::string::npos) {
-		std::string subs = s.substr(cur_pos, find_pos - cur_pos);
-		if (subs.size() != 0) {
-			split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
-		}
-		cur_pos = find_pos + 1;
-	}
-}
-
-bool HMM::str_to_number(int &val, const std::string &str) {
-	val = 0;
-	int ten = 1;
-	for (int i = (str.length()) - 1; i >= 0; i --) {
-		int num = str[i] - '0';
-		if (! (num >= 0 && num <= 9)) {
-			return false;
-		}
-		val += num * ten;
-		ten *= 10;
-	}
-	return true;
 }
 
 bool HMM::load_training_sample(const char* file_name) {
@@ -246,7 +213,6 @@ bool HMM::viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> &hi
 	
 	for (int j = 1; j <= _N; j ++) {
 		beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
-		//beta[1][j] = _pi[j] * _B[j][observed_seq[0]];
 		opt_path[1][j] = j;
 	}
 
@@ -254,7 +220,6 @@ bool HMM::viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> &hi
 		for (int i = 1; i <= _N; i ++) {
 			max_value = -1000000;
 			for (int j = 1; j <= _N; j ++) {
-				// float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
 				if ((i == 1 && (j == 3 || j == 4)) ||
 						(i == 2 && (j == 1 || j == 2 || j == 4)) ||
 						(i == 3 && (j == 1 || j == 2 || j == 4)) ||
@@ -287,7 +252,6 @@ bool HMM::viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> &hi
 		max_index = opt_path[j][max_index];
 		hidden_status.push_back(max_index);
 	}
-
 }
 
 bool HMM::viterbi(const std::vector<int> &observed_seq, std::vector<int> &hidden_status) {
@@ -306,9 +270,7 @@ bool HMM::viterbi(const std::vector<int> &observed_seq, std::vector<int> &hidden
 	}
 	
 	for (int j = 1; j <= _N; j ++) {
-		//beta[1][j] = log(_pi[j])  + log(_B[j][observed_seq[0]]);
 		beta[1][j] = _pi[j] * _B[j][observed_seq[0]];
-		//cout << beta[1][j] << " " << std::endl;
 		opt_path[1][j] = j;
 	}
 
@@ -316,7 +278,6 @@ bool HMM::viterbi(const std::vector<int> &observed_seq, std::vector<int> &hidden
 		for (int i = 1; i <= _N; i ++) {
 			max_value = -1000000;
 			for (int j = 1; j <= _N; j ++) {
-				// float temp_val = beta[t - 1][j] + log(_A[j][i]) + log(_B[i][observed_seq[t - 1]]);
 				float temp_val = beta[t - 1][j] + _A[j][i] * _B[i][observed_seq[t-1]];
 				if (temp_val > max_value) {
 					max_value = temp_val;

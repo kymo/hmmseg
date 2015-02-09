@@ -63,26 +63,25 @@ private:
 										// sequence and hidden status
 	std::vector<std::vector<int> > _sta_co_cnt;	// cnt for co-exist of hidden status
 
-	// std::string to number
-	bool str_to_number(int &val, const std::string &str);
-
-	// split data
-	void split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag);
 	
-	// calculate the confused matrix _B
-	// _B[i][j] indicating the probability of generating observed
-	// sequence j from hidden status i
-	// _B[i][j] = p(o_j | c_i) = count(o_j,c_i) / count(c_i)
-	// count(o_j, c_i) means the times when o_j and c_i shows together
-	// in the feature file, count(c_i) means the show times of c_i
-	// in the feature file
+	// brief : calculate the confused matrix _B
+	// note : _B[i][j] indicating the probability of generating observed sequence j
+	//		from hidden status i _B[i][j] = p(o_j | c_i) = count(o_j,c_i) / count(c_i)
+	// 		count(o_j, c_i) means the times when o_j and c_i shows together in the 
+	//		feature file, count(c_i) means the show times of c_i in the feature file
+	// param : 
+	//		None
+	// return :
+	// 		None
 	void calc_confused_matrix();
 	
-	// calculate the transfering matrix
-	// _A[i][j] indicating the probability of transfering from 
-	// hidden status i to hidden status j
-	// _A[i][j] = p(c_j | c_i) = count(c_j, c_i) / count(c_i)
-
+	// brief : calculate the transfering matrix
+	// note : _A[i][j] indicating the probability of transfering from hidden status
+	//		i to hidden status j _A[i][j] = p(c_j | c_i) = count(c_j, c_i) / count(c_i)
+	// param : 
+	//		None
+	// return :
+	// 		None
 	void calc_tranfer_matrix();
 
 public:
@@ -100,21 +99,51 @@ public:
 	// load training file
 	bool load_training_sample(const char *file_name);
 
-	// save model
+	// brief : save the model in file_name
+	// param :
+	//		file_name : model file name
+	// return :
+	//		None
 	void save_model(const char *file_name);
 
-	// hmm train model
+	// brief : hmm train model
+	// note : just calculate the two matrixes, and a model is formed by statistics.
+	// param : 
+	//		None
+	// return :
+	//		None
 	void statistic_train();
 
 	// em train
 	void em_train();
 	
-	// load hmm model actually load the matrixs
+	// brief : load hmm model actually load the matrixs
+	// param :
+	//		file_name : model file 
+	// return :
+	//		None
 	bool load_model(const char *file_name);
 
-	// viterbi algorithm to find the most prossible hidden statuses which generate
-	// the given observed data
+	// brief : common viterbi algorithm to find the most prossible hidden statuses which
+	//		generate the given observed data
+	// param :
+	// 		observed_seq : the observed sequences
+	//		hidden_status : the status that generate the observed sequence with the max 
+	//			probability
+	// return :
+	//		None
 	bool viterbi(const std::vector<int> &observed_seq, std::vector<int> & hidden_status);	
+	
+	// brief : viterbi algorithm for segmentation interface to wordseg  module
+	// note : in the path that generate the hidden status, we obey the rules that generate
+	// 		the observed sequence, that means when the hidden status is B, then the next
+	//		status cannot be S, but M or S only.
+	// param : 
+	//		observed_seq : observed sequence
+	//		hidden_status : the status the generate the observed sequence with the max 
+	//			probability.
+	// return :
+	//		None
 	bool viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> & hidden_status);	
 	
 };

@@ -47,10 +47,14 @@ private:
 	std::map<char, int> _status_to_index;		// status to index map
 	HMM*	_hmm;								// hmm model
 	Trie*	_trie;								// trie tree
-	// split the std::string
-	void split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag);
 	
-	// get word index
+	// brief : get word index to save
+	// note : the function is called only in the process of generating the training corpus for 
+	//		hmm model. that is to say, this method is used to save the word index number when 
+	//		transfering the raw corpus to the hidden_status:observed_status format.
+	// param : 
+	//		cur_word_cnt : current max word index number
+	//		str_indexes : save the words indexes.
 	void get_word_index(int &cur_word_cnt,
 			std::vector<int> &str_indexes,
 			const std::string &str);

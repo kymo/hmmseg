@@ -15,41 +15,9 @@
 //
 
 #include "trie.h"
+#include "util.h"
 
 namespace hmmseg {
-
-bool Trie::split_ch_words(const std::string &line, std::vector<std::string> &words) {
-	std::string cn_word = "";
-	std::string not_cn_word = "";
-	for (int i = 0; i < line.length(); i ++) {
-		if (line[i] < 0) {
-			cn_word += line[i];
-			if (not_cn_word != "") {
-				words.push_back(not_cn_word); 
-				not_cn_word = "";
-			}
-		} else {
-			not_cn_word += line[i];
-			if (cn_word != "") {
-				for (int j = 0; j < cn_word.size() / 3; j ++) {	
-					words.push_back(cn_word.substr(j * 3, 3));
-				}
-				cn_word = "";
-			}
-		}
-	}
-
-	if (not_cn_word != "") {
-		words.push_back(not_cn_word);
-	} 
-	
-	if (cn_word != "") {
-		for (int j = 0; j < cn_word.size() / 3; j ++) {	
-			words.push_back(cn_word.substr(j * 3, 3));
-		}
-	}
-	return true;
-}
 
 void Trie::set_string_node(bool is_string_node) {
 	_is_string_node = is_string_node;
@@ -117,63 +85,47 @@ bool Trie::find_all_results(std::string &str,
 	std::vector<std::string> words;
 	std::vector<std::string> temp_results;
 	split_ch_words(str, words);
-	for (int i = 0; i < words.size(); i ++) {
-		std::cout << words[i] << " ";
-	}
-	std::cout << std::endl;
 	len = words.size();
-	dfs_search(0, len - 1, _root, words, temp_results, results);
+	dfs_search(0, len - 1, words, temp_results, results);
 	return true;
 }
 
 void Trie::dfs_search(int i, int j,
-		Trie *&tree,
 		const std::vector<std::string> &words,
 		std::vector<std::string> &temp_results,
 		std::vector<std::vector<std::string> > &results) {
-	
-	if (i > j) return ;
-
-	if (i == j) {
-		if (tree->_child_trees.find(words[i]) != tree->_child_trees.end()) {
-			if (tree->_child_trees[words[i]]->_is_string_node) {
-				results.push_back(temp_results);
+	if (i > j)  {	
+		results.push_back(temp_results);
+		return ;
+	}
+	int k;
+	std::string temp_str;
+	std::vector<int> indexes;
+	Trie *tree = _root;
+	if (tree->_child_trees.find(words[i]) != tree->_child_trees.end()) {
+		tree = tree->_child_trees[words[i]];
+		for (k = i + 1; k <= j; k ++) {	
+			if (tree->_child_trees.find(words[k]) != tree->_child_trees.end()) {
+				if (tree->_child_trees[words[k]]->_is_string_node) {
+					indexes.push_back(k);
+				}
+				tree = tree->_child_trees[words[k]];
+			} else {
+				break;
 			}
 		}
 	}
-
-	std::cout << i << " " << j << std::endl;
-	bool tag = false;
-	std::string ans = "";
-	int k = i;
-	std::vector<std::string> t_ans;
-	
-	while (k <= j) {
-		std::cout << k << std::endl;
-
-		if (tree->_child_trees.find(words[k]) != tree->_child_trees.end()) {
-			t_ans.push_back(words[k]);
-			if (tree->_child_trees[words[k]]->_is_string_node) {
-			  	ans = "";
-				for (int i = 0; i < t_ans.size(); i ++) {
-					ans += t_ans[i];
-				}
-				temp_results.push_back(ans);
-				dfs_search(k + 1, j, _root, 
-						words,	
-						temp_results,
-						results);
-				temp_results.pop_back();
-			}
-			tree = tree->_child_trees[words[k]];
-			k ++;
-		} else {
-			
-			t_ans.push_back(words[k]);
-			temp_results.push_back(t_ans[0]);
-			t_ans.clear();
-			k = k - t_ans.size() + 1;
+	if (indexes.size() == 0) {
+		indexes.push_back(i);
+	}
+	for (k = 0; k < indexes.size(); k ++) {
+		temp_str = "";
+		for (int l = i; l <= indexes[k]; l ++) {
+			temp_str += words[l];
 		}
+		temp_results.push_back(temp_str);
+		dfs_search(indexes[k] + 1, j, words, temp_results, results);
+		temp_results.pop_back();
 	}
 }
 
@@ -217,11 +169,9 @@ bool Trie::search(Trie *&tree,
 			return tree->_child_trees[words[i]]->_is_string_node;
 		}
 	}
-
 	if (tree->_child_trees.find(words[i]) == tree->_child_trees.end()) {
 		return false;
-	}
-	
+	}	
 	return search(tree->_child_trees[words[i]], words, i + 1, j);
 }
 }

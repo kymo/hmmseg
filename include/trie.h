@@ -42,13 +42,6 @@ private:
 	// 		None
 	void build_tree(Trie *&trie, const std::vector<std::string> &words, int cur);
 	
-	// brief : split the chinese word to single one
-	// param : 
-	//		line : the chinese string
-	//		words : a vector store the outcome
-	// return : 
-	//		None
-	bool split_ch_words(const std::string &line, std::vector<std::string> &words);
 
 public:
 	bool _is_string_node;
@@ -71,7 +64,6 @@ public:
 	
 	// brief : dfs seach
 	void dfs_search(int i, int j,
-			Trie *&tree,
 			const std::vector<std::string> &words,
 			std::vector<std::string> &temp_results,
 			std::vector<std::vector<std::string> > &results) ;

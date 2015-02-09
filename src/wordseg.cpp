@@ -13,30 +13,17 @@
 
 
 #include "wordseg.h"
-namespace hmmseg {
+#include "util.h"
 
-void WordSeg::split(std::string &s, std::vector<std::string> &split_ret, const std::string &tag) {
-	split_ret.clear();
-	if (s.find(tag) == std::string::npos) {
-		return ;
-	}
-	int cur_pos = 0, find_pos = 0;
-	s += tag;
-	while ((find_pos = s.find(tag, cur_pos)) != std::string::npos) {
-		std::string subs = s.substr(cur_pos, find_pos - cur_pos);
-		if (subs.size() != 0) {
-			split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
-		}
-		cur_pos = find_pos + tag.length();
-	}
-}
+namespace hmmseg {
 
 void WordSeg::get_word_index(int &cur_word_cnt, 
 		std::vector<int> &str_indexes, 
 		const std::string &str) {
-	int word_len = str.size() / 3;
-	for (int i = 0; i < word_len; i ++) {
-		std::string sub = str.substr(i * 3, 3);
+	std::vector<std::string> ch_words;
+	split_ch_words(str, ch_words);
+	for (std::vector<std::string>::iterator it = ch_words.begin(); it != ch_words.end(); it ++) {
+		std::string sub = *it;
 		if (_word_to_index.find(sub) == _word_to_index.end()) {
 			cur_word_cnt += 1;
 			_word_to_index[sub] = cur_word_cnt;
@@ -44,17 +31,6 @@ void WordSeg::get_word_index(int &cur_word_cnt,
 		str_indexes.push_back(_word_to_index[sub]);
 	}
 }
-
-std::string WordSeg::int_to_str(int val) {
-	std::string ret = "";
-	if (val == 0) return "0";
-	while (val > 0) {
-		ret += val % 10 + '0';
-		val /= 10;
-	}
-	return std::string(ret.rbegin(), ret.rend());
-}
-
 
 void WordSeg::load_data(const char *file_name) {
 	std::string status = "BMES";
@@ -103,7 +79,6 @@ void WordSeg::load_data(const char *file_name) {
 		}
 		std::cout << all_ans << std::endl;
 	}
-
 }
 
 void WordSeg::save_dict(const char *file) {
@@ -111,16 +86,16 @@ void WordSeg::save_dict(const char *file) {
 	// save number
 	try {
 		fos << "4:" << _word_to_index.size() << std::endl;
-	// save status
-	for (std::map<char, int>::iterator it = _status_to_index.begin();
-			it != _status_to_index.end(); it ++) {
-		fos << it->first << ":" << it->second << std::endl;
-	}
-	// save word index
-	for (std::map<std::string, int>::iterator it = _word_to_index.begin();
-			it != _word_to_index.end(); it ++) {
-		fos << it->first << ":" << it->second << std::endl;
-	}
+		// save status
+		for (std::map<char, int>::iterator it = _status_to_index.begin();
+				it != _status_to_index.end(); it ++) {
+			fos << it->first << ":" << it->second << std::endl;
+		}
+		// save word index
+		for (std::map<std::string, int>::iterator it = _word_to_index.begin();
+				it != _word_to_index.end(); it ++) {
+			fos << it->first << ":" << it->second << std::endl;
+		}
 	} catch(std::exception &e) {
 		std::cerr << "Error when saveing the word dict !" << std::endl;
 		return ;
@@ -177,12 +152,11 @@ bool WordSeg::init_env(const char *dict_file,
 }
 
 void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_result) {
-	int word_len = str.length() / 3;
 	std::vector<int> sequence;
-
-	for (int i = 0; i < word_len; i ++) {
-		std::string substr = str.substr(3 * i, 3);
-		sequence.push_back(_word_to_index[substr]);
+	std::vector<std::string> ch_words;
+	split_ch_words(str, ch_words);
+	for (std::vector<std::string>::iterator it = ch_words.begin(); it != ch_words.end(); it ++){
+		sequence.push_back(_word_to_index[*it]);
 	}
 
 	std::vector<int> hidden_status;
@@ -190,9 +164,9 @@ void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_resul
 	reverse(hidden_status.begin(), hidden_status.end());
 
 	std::string cur = "";
+	int word_len = ch_words.size();
 	for (int j = 0; j < word_len; j ++) {
-		std::string substr = str.substr(3 * j, 3);	
-		cur += substr;
+		cur += ch_words[j];
 		if ((hidden_status[j] == 4 || hidden_status[j] == 3)) {
 			word_seg_result.push_back(cur);
 			cur = "";
@@ -204,7 +178,8 @@ void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_re
 
 	std::vector<std::vector<std::string> > results;
 	if (! _trie->find_all_results(str, results)) {
-	
+		std::cerr << "Error when find all the segmented results in the source string !" << std::endl;
+		return ;
 	}
 	for (int i = 0; i < results.size(); i ++) {
 		for (int j = 0; j < results[i].size(); j ++) {
