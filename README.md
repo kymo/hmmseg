@@ -1,6 +1,4 @@
 # hmmseg
-hmm for segmentation
+hmm for segmentation : leverage the maximum match strategy and the hmm model for chinese word's segmentation with great robust and acceptable precision.
 
-## use a trie tree to store the dict
-
-# apply the maximum match strategy and hmm model
+## apply the maximum match strategy and hmm model
