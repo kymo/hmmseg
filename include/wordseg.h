@@ -98,6 +98,7 @@ public:
 	bool init_env(const char *dict_file, 
 			const char *model_path,	
 			const char *trie_dict_paht);
+	
 	// brief : segment the word
 	// param :
 	//		str : the string which gona to be segmented
@@ -113,6 +114,14 @@ public:
 	// return :
 	//		None
 	void segment_mm(std::string &str, std::vector<std::string> &word_seg_results);
+
+	// brief : get hidden status according to the words
+	// param :
+	//		split_ret : split results
+	//		status : the vector gona to save the status
+	// return :
+	//		None
+	void get_hidden_status(const std::vector<std::string> &split_ret, std::vector<int> &status);
 };
 
 }

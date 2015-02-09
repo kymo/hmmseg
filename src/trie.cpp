@@ -19,6 +19,7 @@
 
 namespace hmmseg {
 namespace trie {
+
 void Trie::set_string_node(bool is_string_node) {
 	_is_string_node = is_string_node;
 }
@@ -94,10 +95,12 @@ void Trie::dfs_search(int i, int j,
 		const std::vector<std::string> &words,
 		std::vector<std::string> &temp_results,
 		std::vector<std::vector<std::string> > &results) {
+	
 	if (i > j)  {	
 		results.push_back(temp_results);
 		return ;
 	}
+	
 	int k;
 	std::string temp_str;
 	std::vector<int> indexes;
@@ -115,10 +118,13 @@ void Trie::dfs_search(int i, int j,
 			}
 		}
 	}
+	
 	if (indexes.size() == 0) {
 		indexes.push_back(i);
 	}
-	for (k = 0; k < indexes.size(); k ++) {
+	
+	int last = -1;
+	for (int k = 0; k < indexes.size(); k ++) {
 		temp_str = "";
 		for (int l = i; l <= indexes[k]; l ++) {
 			temp_str += words[l];
@@ -127,6 +133,7 @@ void Trie::dfs_search(int i, int j,
 		dfs_search(indexes[k] + 1, j, words, temp_results, results);
 		temp_results.pop_back();
 	}
+
 }
 
 void Trie::simple_seg(std::string &str) { 

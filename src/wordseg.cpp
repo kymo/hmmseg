@@ -82,6 +82,28 @@ void WordSeg::load_data(const char *file_name) {
 	}
 }
 
+void WordSeg::get_hidden_status(const std::vector<std::string> &split_ret,
+		std::vector<int> &status) {
+
+	for (std::vector<std::string>::const_iterator it = split_ret.begin(); it != split_ret.end(); it ++) {
+		
+		std::vector<std::string> ch_words;
+		hmmseg::util::split_ch_words(*it, ch_words);
+		for (int j = 0; j < ch_words.size(); j ++) {
+			if (j == 0 && ch_words.size() > 1) {
+				status.push_back(1);
+			} else if (j + 1 < ch_words.size()) {
+				status.push_back(2);
+			} else if (j + 1 == ch_words.size() && ch_words.size() > 1){
+				status.push_back(3);
+			}
+		}
+		if (ch_words.size() == 1) {
+			status.push_back(4);
+		}
+	}
+}
+
 void WordSeg::save_dict(const char *file) {
 	std::ofstream fos(file);
 	// save number
@@ -137,7 +159,6 @@ bool WordSeg::init_dict(const char *dict_file) {
 bool WordSeg::init_env(const char *dict_file,
 		const char *model_path,
 		const char *trie_dict_path) {
-	
 	_hmm = new hmmseg::hmm::HMM();
 	_trie = new hmmseg::trie::Trie();
 	if (! _hmm->load_model(model_path)) {
@@ -176,20 +197,83 @@ void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_resul
 }
 
 void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_results) {
-
 	std::vector<std::vector<std::string> > results;
-	if (! _trie->find_all_results(str, results)) {
-		std::cerr << "Error when find all the segmented results in the source string !" << std::endl;
-		return ;
+	std::vector<int> observed_seq;
+	std::vector<std::string> ch_words;
+	hmmseg::util::split_ch_words(str, ch_words);
+	
+	for (int i = 0; i < ch_words.size(); i ++) {
+		std::cout << ch_words[i] << " ";
 	}
-	for (int i = 0; i < results.size(); i ++) {
-		for (int j = 0; j < results[i].size(); j ++) {
-			if (j + 1 < results[i].size()) {
-				std::cout << results[i][j] << " ";
-			} else {
-				std::cout << results[i][j] << std::endl;
+	std::cout << std::endl;
+	
+	for (std::vector<std::string>::iterator it = ch_words.begin(); it != ch_words.end(); it ++) {
+		observed_seq.push_back(_word_to_index[*it]);
+	}
+	std::vector<int> temp;
+	std::string cur_split_str = "";
+	std::vector<int> cur_obs_seq;
+	float mx = 0 - (1 << 30);
+	float temp_val;
+	int index;
+	
+	for (int j = 0; j < ch_words.size(); j ++) {
+		if (hmmseg::util::is_sign(ch_words[j]) && cur_split_str != "") {
+			if (! _trie->find_all_results(cur_split_str, results)) {
+				std::cerr << "Error when find all the segmented results in the source string !" << std::endl;
+				return ;
+			}
+
+			mx = 0 - (1 << 30);
+			index = 0;
+			for (int k = 0; k < results.size(); k ++) {
+				temp.clear();
+				get_hidden_status(results[k], temp);
+				temp_val = _hmm->calculate_pro(cur_obs_seq, temp);
+				if (temp_val > mx) {
+					mx = temp_val;
+					index = k;
+				}
+			}
+
+			for (std::vector<std::string>::iterator it = results[index].begin(); 
+					it != results[index].end(); it ++) {
+				word_seg_results.push_back(*it);
+			}	
+			word_seg_results.push_back(ch_words[j]);
+			results.clear();
+			cur_obs_seq.clear();
+			cur_split_str = "";
+		} else {
+			cur_obs_seq.push_back(observed_seq[j]);
+			cur_split_str += ch_words[j];
+		}
+	}
+
+	if (cur_split_str != "") {
+		if (! _trie->find_all_results(cur_split_str, results)) {
+			std::cerr << "Error when find all the segmented results in the source string !" << std::endl;
+			return ;
+		}
+
+		mx = 0 - (1 << 30);
+		index = 0;
+		for (int k = 0; k < results.size(); k ++) {
+			temp.clear();
+			get_hidden_status(results[k], temp);
+			temp_val = _hmm->calculate_pro(cur_obs_seq, temp);
+			if (temp_val > mx) {
+				mx = temp_val;
+				index = k;
 			}
 		}
+		for (std::vector<std::string>::iterator it = results[index].begin(); 
+				it != results[index].end(); it ++) {
+			word_seg_results.push_back(*it);
+		}	
+		results.clear();
+		cur_obs_seq.clear();
+		cur_split_str = "";
 	}
 }
 

@@ -55,6 +55,13 @@ bool split(std::string &str, std::vector<std::string> &split_ret, const std::str
 // return :
 //		None
 std::string int_to_str(int val);
+
+// brief : is sign
+bool is_sign(std::string str);
+
+// brief : is chinese word
+bool is_ch_word(char word);
+
 }
 }
 

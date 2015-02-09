@@ -147,6 +147,14 @@ public:
 	//		None
 	bool viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> & hidden_status);	
 	
+	// brief : given the hidden status and the observed data, calculate the probability.
+	// param : 
+	//		observed_seq : observed sequence
+	//		hidden_status : hidden status 
+	// return :
+	//		None
+	float calculate_pro(const std::vector<int> &observed_seq,
+			const std::vector<int> &hidden_status) ;
 };
 }
 }

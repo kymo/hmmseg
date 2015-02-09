@@ -4,7 +4,7 @@
 
 #include "wordseg.h"
 #include "trie.h"
-
+#include "util.h"
 using namespace hmmseg::hmm;
 using namespace hmmseg::trie;
 using namespace hmmseg::wordseg;
@@ -85,16 +85,15 @@ void test_seg_word(int argv, char *argc[]) {
 	while (getline(fis, line)) {
 		std::vector<std::string> results;
 		word_seg->segment_mm(line, results);
-		/*
+		//word_seg->segment(line, results);
 		int len_ret = results.size();
 		for (int i = 0; i < len_ret; i ++) {
 			if (i < len_ret - 1) {
-				std::cout << results[i] << "  ";
+				std::cout << results[i] << " ";
 			} else {
 				std::cout << results[i] << std::endl;
 			}
 		}
-		*/
 	}
 }
 

@@ -196,6 +196,17 @@ void HMM::statistic_train() {
 	// save the model
 }
 
+float HMM::calculate_pro(const std::vector<int> &observed_seq,
+		const std::vector<int> &hidden_status) {
+	float start = log(_pi[hidden_status[0]]) + log(_B[hidden_status[0]][observed_seq[0]]);
+	for (int j = 1; j < hidden_status.size(); j ++) {
+		if(_A[hidden_status[j - 1]][hidden_status[j] - 1] != 0 &&_B[hidden_status[j]][observed_seq[j]] != 0) {
+			start += log(_A[hidden_status[j - 1]][hidden_status[j] - 1]) + log(_B[hidden_status[j]][observed_seq[j]]);
+		}
+	}
+	return start;
+}
+
 bool HMM::viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> &hidden_status) {
 	int T;
 	std::vector<std::vector<float> > beta;

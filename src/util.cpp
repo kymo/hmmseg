@@ -15,35 +15,35 @@
 
 namespace hmmseg {
 namespace util {
+
 bool split_ch_words(const std::string &line, std::vector<std::string> &words) {
 	std::string cn_word = "";
 	std::string not_cn_word = "";
-	for (int i = 0; i < line.length(); i ++) {
-		if (line[i] < 0) {
-			cn_word += line[i];
+	for (int i = 0; i < line.length();) {
+		int tag = 0;
+		if ((int)(line[i] & 0xf0) == 0xe0) {
 			if (not_cn_word != "") {
-				words.push_back(not_cn_word); 
-				not_cn_word = "";
+				words.push_back(not_cn_word);
 			}
-		} else {
-			not_cn_word += line[i];
-			if (cn_word != "") {
-				for (int j = 0; j < cn_word.size() / 3; j ++) {	
-					words.push_back(cn_word.substr(j * 3, 3));
-				}
-				cn_word = "";
+			not_cn_word = "";
+			if ((int)(line[i + 1] & 0xc0) == 0x80 && (int)(line[i + 2] & 0xc0) == 0x80) {
+				words.push_back(line.substr(i, 3));
+				i += 3;
+				continue;
 			}
+		} else if (line[i] == ' ') {
+			if (not_cn_word != "") {
+				words.push_back(not_cn_word);
+			}
+			not_cn_word = "";
+			i += 1;
+			continue;
 		}
+		not_cn_word += line[i];
+		i += 1;
 	}
-
 	if (not_cn_word != "") {
 		words.push_back(not_cn_word);
-	} 
-	
-	if (cn_word != "") {
-		for (int j = 0; j < cn_word.size() / 3; j ++) {	
-			words.push_back(cn_word.substr(j * 3, 3));
-		}
 	}
 	return true;
 }
@@ -95,5 +95,22 @@ bool str_to_number(int &val, const std::string &str) {
 	}
 	return true;
 }
+
+bool is_sign(std::string str) {
+	if (str.size() != 3) return true;
+
+	if (((int)(str[0] & 0xf0) == 0xe0 && (int)(str[0] & 0xc0 == 0x20) && (int)(str[2] & 0xc0 == 0x20))) {
+		return false;
+	}
+
+	if (str == "。" || str == "，" || str == "：" || str == "，" 
+			|| str == "”" || str == "“" || str == "‘" 
+			|| str == "’" || str == "、" || str == "？" 
+			|| str == "』" || str == "『" || str == "【" 
+			|| str == "】" || str == "！" || str == "；")
+		return true;
+	return false;
+}
+
 }
 }
