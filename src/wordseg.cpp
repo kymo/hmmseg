@@ -16,12 +16,13 @@
 #include "util.h"
 
 namespace hmmseg {
+namespace wordseg {
 
 void WordSeg::get_word_index(int &cur_word_cnt, 
 		std::vector<int> &str_indexes, 
 		const std::string &str) {
 	std::vector<std::string> ch_words;
-	split_ch_words(str, ch_words);
+	hmmseg::util::split_ch_words(str, ch_words);
 	for (std::vector<std::string>::iterator it = ch_words.begin(); it != ch_words.end(); it ++) {
 		std::string sub = *it;
 		if (_word_to_index.find(sub) == _word_to_index.end()) {
@@ -43,7 +44,7 @@ void WordSeg::load_data(const char *file_name) {
 	int cur_diff_word_cnt = 0;
 	while (getline(fis, line)) {
 		tag = "  ";
-		split(line, split_ret, tag);
+		hmmseg::util::split(line, split_ret, tag);
 		std::string all_ans = "";
 		std::vector<int> test;
 		for (int i = 0; i < split_ret.size(); i ++) {
@@ -53,13 +54,13 @@ void WordSeg::load_data(const char *file_name) {
 			for (int j = 0; j < str_indexes.size(); j ++) {
 				if (j == 0) {
 					test.push_back(1);
-					ret_ans += "1:" + int_to_str(str_indexes[j]);
+					ret_ans += "1:" + hmmseg::util::int_to_str(str_indexes[j]);
 				} else if (j < str_indexes.size() - 1) {
 					test.push_back(2);
-					ret_ans += "2:" + int_to_str(str_indexes[j]);
+					ret_ans += "2:" + hmmseg::util::int_to_str(str_indexes[j]);
 				} else {
 					test.push_back(3);
-					ret_ans += "3:" + int_to_str(str_indexes[j]);
+					ret_ans += "3:" + hmmseg::util::int_to_str(str_indexes[j]);
 				}
 				if (j < str_indexes.size() - 1) {
 					ret_ans += ",";
@@ -111,18 +112,18 @@ bool WordSeg::init_dict(const char *dict_file) {
 		std::ifstream fis(dict_file);
 		tag = ":";
 		fis >> str ;
-		split(str, split_ret, tag);
+		hmmseg::util::split(str, split_ret, tag);
 		n = atoi(split_ret[0].c_str());
 		t = atoi(split_ret[1].c_str());
 		for (int i = 0; i < n; i ++) {
 			fis >> str;
-			split(str, split_ret, tag);
+			hmmseg::util::split(str, split_ret, tag);
 			_status_to_index[split_ret[0][0]] = atoi((split_ret[1]).c_str());
 		}
 		
 		for (int j = 0; j < t;j ++) {
 			fis >> str;
-			split(str, split_ret, tag);
+			hmmseg::util::split(str, split_ret, tag);
 			_word_to_index[split_ret[0]] = atoi(split_ret[1].c_str());
 
 		}
@@ -137,8 +138,8 @@ bool WordSeg::init_env(const char *dict_file,
 		const char *model_path,
 		const char *trie_dict_path) {
 	
-	_hmm = new HMM();
-	_trie = new Trie();
+	_hmm = new hmmseg::hmm::HMM();
+	_trie = new hmmseg::trie::Trie();
 	if (! _hmm->load_model(model_path)) {
 		return false;
 	}
@@ -154,7 +155,7 @@ bool WordSeg::init_env(const char *dict_file,
 void WordSeg::segment(std::string &str, std::vector<std::string> &word_seg_result) {
 	std::vector<int> sequence;
 	std::vector<std::string> ch_words;
-	split_ch_words(str, ch_words);
+	hmmseg::util::split_ch_words(str, ch_words);
 	for (std::vector<std::string>::iterator it = ch_words.begin(); it != ch_words.end(); it ++){
 		sequence.push_back(_word_to_index[*it]);
 	}
@@ -192,4 +193,5 @@ void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_re
 	}
 }
 
+}
 }

@@ -39,14 +39,16 @@
 #include "hmm.h"
 
 namespace hmmseg {
+namespace wordseg {
+	
 class WordSeg {
 
 private:
 
 	std::map<std::string, int> _word_to_index;	// word to index map
 	std::map<char, int> _status_to_index;		// status to index map
-	HMM*	_hmm;								// hmm model
-	Trie*	_trie;								// trie tree
+	hmmseg::hmm::HMM*	_hmm;								// hmm model
+	hmmseg::trie::Trie*	_trie;								// trie tree
 	
 	// brief : get word index to save
 	// note : the function is called only in the process of generating the training corpus for 
@@ -113,5 +115,6 @@ public:
 	void segment_mm(std::string &str, std::vector<std::string> &word_seg_results);
 };
 
+}
 }
 #endif

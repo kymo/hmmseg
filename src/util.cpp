@@ -13,7 +13,8 @@
 
 #include "util.h"
 
-
+namespace hmmseg {
+namespace util {
 bool split_ch_words(const std::string &line, std::vector<std::string> &words) {
 	std::string cn_word = "";
 	std::string not_cn_word = "";
@@ -50,18 +51,18 @@ bool split_ch_words(const std::string &line, std::vector<std::string> &words) {
 
 bool split(std::string &str, std::vector<std::string> &split_ret, const std::string &tag) {
 	split_ret.clear();
-	if (s.find(tag) == std::string::npos) {
-		if (s.length() != 0) {
-			split_ret.push_back(s);
+	if (str.find(tag) == std::string::npos) {
+		if (str.length() != 0) {
+			split_ret.push_back(str);
 		}
 		return false;
 	}
 	int cur_pos = 0, find_pos = 0;
-	s += tag;
-	while ((find_pos = s.find(tag, cur_pos)) != std::string::npos) {
-		std::string subs = s.substr(cur_pos, find_pos - cur_pos);
+	str += tag;
+	while ((find_pos = str.find(tag, cur_pos)) != std::string::npos) {
+		std::string subs = str.substr(cur_pos, find_pos - cur_pos);
 		if (subs.size() != 0) {
-			split_ret.push_back(s.substr(cur_pos, find_pos - cur_pos));
+			split_ret.push_back(str.substr(cur_pos, find_pos - cur_pos));
 		}
 		cur_pos = find_pos + 1;
 	}
@@ -93,4 +94,6 @@ bool str_to_number(int &val, const std::string &str) {
 		ten *= 10;
 	}
 	return true;
+}
+}
 }

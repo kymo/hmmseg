@@ -5,7 +5,9 @@
 #include "wordseg.h"
 #include "trie.h"
 
-using namespace hmmseg;
+using namespace hmmseg::hmm;
+using namespace hmmseg::trie;
+using namespace hmmseg::wordseg;
 
 int test_train_module(int argv, char *argc[]) {
 	if (argv < 5) {

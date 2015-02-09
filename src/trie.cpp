@@ -18,7 +18,7 @@
 #include "util.h"
 
 namespace hmmseg {
-
+namespace trie {
 void Trie::set_string_node(bool is_string_node) {
 	_is_string_node = is_string_node;
 }
@@ -70,7 +70,7 @@ bool Trie::load_dict(const char* file_name) {
 	std::map<std::string, int> dic;
 	while (getline(fis, line)) {
 		std::vector<std::string> words;
-		if (! split_ch_words(line, words)) {
+		if (! hmmseg::util::split_ch_words(line, words)) {
 			std::cerr << "Error when split the words in line : " << line_num << std::endl;
 			return false;
 		}
@@ -84,7 +84,7 @@ bool Trie::find_all_results(std::string &str,
 	int len;
 	std::vector<std::string> words;
 	std::vector<std::string> temp_results;
-	split_ch_words(str, words);
+	hmmseg::util::split_ch_words(str, words);
 	len = words.size();
 	dfs_search(0, len - 1, words, temp_results, results);
 	return true;
@@ -134,7 +134,7 @@ void Trie::simple_seg(std::string &str) {
 	std::vector<std::string> words;
 	std::string trunk;
 	int start , ends;
-	split_ch_words(str, words);
+	hmmseg::util::split_ch_words(str, words);
 	start = 0, ends = words.size();
 	ends --;
 	while (start <= ends) {
@@ -175,4 +175,4 @@ bool Trie::search(Trie *&tree,
 	return search(tree->_child_trees[words[i]], words, i + 1, j);
 }
 }
-
+}

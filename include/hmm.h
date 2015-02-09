@@ -49,6 +49,7 @@
 #include <algorithm>
 
 namespace hmmseg {
+namespace hmm {
 class HMM {
 private:
 	
@@ -147,5 +148,6 @@ public:
 	bool viterbi_seg(const std::vector<int> &observed_seq, std::vector<int> & hidden_status);	
 	
 };
+}
 }
 #endif

@@ -28,6 +28,8 @@
 #include <algorithm>
 
 namespace hmmseg {
+
+namespace trie {	
 class Trie {
 private:
 
@@ -94,5 +96,5 @@ public:
 
 };
 }
-
+}
 #endif

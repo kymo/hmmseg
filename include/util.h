@@ -21,6 +21,8 @@
 #include <vector>
 #include <algorithm>
 
+namespace hmmseg {
+namespace util {
 // brief : split the chinese word to single one
 // param : 
 //		line : the chinese string
@@ -52,7 +54,11 @@ bool split(std::string &str, std::vector<std::string> &split_ret, const std::str
 //		val : the int that gona to be transfered
 // return :
 //		None
-std::string int_to_string(int val);
+std::string int_to_str(int val);
+}
+}
+
+
 #endif
 
 

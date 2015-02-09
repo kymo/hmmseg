@@ -19,7 +19,7 @@
 #include "hmm.h"
 #include "util.h" 
 namespace hmmseg {
-
+namespace hmm {
 void HMM::init_space() {
 	for (int i = 0; i <= _N; i ++) {
 		_A.push_back(std::vector<float>(_N + 1, 0.0));
@@ -41,22 +41,22 @@ bool HMM::load_training_sample(const char* file_name) {
 		int last_hid_status = -1;
 		tag = ",";
 		line_num += 1;
-		split(line, split_ret, tag);
+		hmmseg::util::split(line, split_ret, tag);
 		if (split_ret.size() == 0) continue;
 
 		for (std::vector<std::string>::iterator it = split_ret.begin();
 				it !=  split_ret.end(); it ++) {
 			std::vector<std::string> cur_split_ret;
 			tag = ":";
-			split(*it, cur_split_ret, tag);
+			hmmseg::util::split(*it, cur_split_ret, tag);
 			if (cur_split_ret.size() == 0) continue;
 			if (cur_split_ret.size() != 2) {
 				std::cerr << "Error when loading training sample : data format is not legal in line" <<
 					line_num << std::endl;
 				return false;
 			}
-			if (! str_to_number(obs_seq_id, cur_split_ret[1]) ||
-					! str_to_number(hid_sta_id, cur_split_ret[0])) {
+			if (! hmmseg::util::str_to_number(obs_seq_id, cur_split_ret[1]) ||
+					! hmmseg::util::str_to_number(hid_sta_id, cur_split_ret[0])) {
 				std::cerr << "Error when loading training sample : data type is not legal in line " <<
 					line_num << std::endl;
 				return false;
@@ -307,5 +307,5 @@ bool HMM::viterbi(const std::vector<int> &observed_seq, std::vector<int> &hidden
 void HMM::em_train() {
 
 }
-
+}
 }
