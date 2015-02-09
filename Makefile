@@ -1,7 +1,13 @@
 cc=g++
 target=test/wordseg
+so_target=so/libhmmseg.so
 obj=obj/main.o obj/util.o obj/wordseg.o obj/hmm.o obj/trie.o
+so_obj=obj/util.o obj/wordseg.o obj/hmm.o obj/trie.o
 CFLAGS= -O2 -g -I ./include
+
+
+$(so_target) : src/*.cpp
+	$(cc) -fPIC -shared -o $(so_target) src/*.cpp -I./include/
 
 $(target) : $(obj)
 	$(cc) -o $(target) $(obj)
@@ -20,6 +26,7 @@ obj/hmm.o : src/hmm.cpp
 
 obj/util.o : src/util.cpp
 	$(cc) -c src/util.cpp $(CFLAGS) -o obj/util.o
+
 
 clean :
 	rm $(target) obj/*.o
