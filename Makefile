@@ -1,16 +1,24 @@
+# makefile for hmmseg
+# a execute program and dynamic shared library will be generated
+# auth : aron
+# date : 2015-02-03
+
 cc=g++
 target=test/wordseg
 so_target=so/libhmmseg.so
 obj=obj/main.o obj/util.o obj/wordseg.o obj/hmm.o obj/trie.o
 so_obj=obj/util.o obj/wordseg.o obj/hmm.o obj/trie.o
 CFLAGS= -O2 -g -I ./include
+targets=$(target) $(so_target)
 
-
-$(so_target) : src/*.cpp
-	$(cc) -fPIC -shared -o $(so_target) src/*.cpp -I./include/
+all : $(targets)
+.PHONY : all
 
 $(target) : $(obj)
 	$(cc) -o $(target) $(obj)
+
+$(so_target) : $(so_obj)
+	$(cc) -fPIC -shared -o $(so_target) src/*.cpp -I./include/
 
 obj/main.o : test/main.cpp 
 	$(cc) -c test/main.cpp $(CFLAGS) -o obj/main.o

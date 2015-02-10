@@ -89,7 +89,7 @@ void test_seg_word(int argv, char *argc[]) {
 		int len_ret = results.size();
 		for (int i = 0; i < len_ret; i ++) {
 			if (i < len_ret - 1) {
-				std::cout << results[i] << " ";
+				std::cout << results[i] << "\\";
 			} else {
 				std::cout << results[i] << std::endl;
 			}

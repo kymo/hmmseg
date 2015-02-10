@@ -95,22 +95,24 @@ void Trie::dfs_search(int i, int j,
 		const std::vector<std::string> &words,
 		std::vector<std::string> &temp_results,
 		std::vector<std::vector<std::string> > &results) {
-	
 	if (i > j)  {	
 		results.push_back(temp_results);
 		return ;
 	}
-	
-	int k;
-	std::string temp_str;
-	std::vector<int> indexes;
+	std::string temp_str = "";
 	Trie *tree = _root;
+	bool tag = true;
 	if (tree->_child_trees.find(words[i]) != tree->_child_trees.end()) {
 		tree = tree->_child_trees[words[i]];
-		for (k = i + 1; k <= j; k ++) {	
+		temp_str = words[i];
+		for (int k = i + 1; k <= j; k ++) {	
 			if (tree->_child_trees.find(words[k]) != tree->_child_trees.end()) {
+				temp_str += words[k];
 				if (tree->_child_trees[words[k]]->_is_string_node) {
-					indexes.push_back(k);
+					temp_results.push_back(temp_str);
+					dfs_search(k + 1, j, words, temp_results, results);
+					temp_results.pop_back();
+					tag = false;
 				}
 				tree = tree->_child_trees[words[k]];
 			} else {
@@ -118,22 +120,11 @@ void Trie::dfs_search(int i, int j,
 			}
 		}
 	}
-	
-	if (indexes.size() == 0) {
-		indexes.push_back(i);
-	}
-	
-	int last = -1;
-	for (int k = 0; k < indexes.size(); k ++) {
-		temp_str = "";
-		for (int l = i; l <= indexes[k]; l ++) {
-			temp_str += words[l];
-		}
-		temp_results.push_back(temp_str);
-		dfs_search(indexes[k] + 1, j, words, temp_results, results);
+	if (tag) {
+		temp_results.push_back(words[i]);
+		dfs_search(i + 1, j, words, temp_results, results);
 		temp_results.pop_back();
-	}
-
+	}	
 }
 
 void Trie::simple_seg(std::string &str) { 

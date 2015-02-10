@@ -223,7 +223,6 @@ void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_re
 				std::cerr << "Error when find all the segmented results in the source string !" << std::endl;
 				return ;
 			}
-
 			mx = 0 - (1 << 30);
 			index = 0;
 			for (int k = 0; k < results.size(); k ++) {
@@ -235,7 +234,6 @@ void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_re
 					index = k;
 				}
 			}
-
 			for (std::vector<std::string>::iterator it = results[index].begin(); 
 					it != results[index].end(); it ++) {
 				word_seg_results.push_back(*it);
@@ -276,6 +274,5 @@ void WordSeg::segment_mm(std::string &str, std::vector<std::string> &word_seg_re
 		cur_split_str = "";
 	}
 }
-
 }
 }
